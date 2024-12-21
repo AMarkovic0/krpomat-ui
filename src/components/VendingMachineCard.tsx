@@ -10,6 +10,8 @@ interface VendingMachineCardProps {
   lastSeen: Date;
   stockLevel: number;
   totalSlots: number;
+  isSelected?: boolean;
+  onClick?: () => void;
 }
 
 export function VendingMachineCard({
@@ -20,12 +22,20 @@ export function VendingMachineCard({
   lastSeen,
   stockLevel,
   totalSlots,
+  isSelected,
+  onClick,
 }: VendingMachineCardProps) {
   const stockPercentage = (stockLevel / totalSlots) * 100;
   const isLowStock = stockPercentage < 20;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card 
+      className={cn(
+        "hover:shadow-lg transition-shadow cursor-pointer",
+        isSelected && "ring-2 ring-primary"
+      )}
+      onClick={onClick}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-bold">{name}</CardTitle>
         <div className="flex items-center space-x-2">

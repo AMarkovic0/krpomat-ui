@@ -2,9 +2,9 @@ import { useState } from "react";
 import { VendingMachineCard } from "@/components/VendingMachineCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Calendar } from "@/components/ui/calendar";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { addDays, format, subDays } from "date-fns";
 
 // Mock data - in a real app, this would come from an API
@@ -48,14 +48,15 @@ const mockMachines = [
 ];
 
 // Mock sales data
-const generateSalesData = (startDate: Date, endDate: Date) => {
+const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) => {
   const data = [];
   let currentDate = startDate;
+  const multiplier = machineId ? parseInt(machineId.replace('vm', '')) : 1;
   
   while (currentDate <= endDate) {
     data.push({
       date: format(currentDate, 'MMM dd'),
-      sales: Math.floor(Math.random() * 100) + 20,
+      sales: Math.floor((Math.random() * 100 + 20) * multiplier),
     });
     currentDate = addDays(currentDate, 1);
   }
@@ -66,6 +67,7 @@ const generateSalesData = (startDate: Date, endDate: Date) => {
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [salesData, setSalesData] = useState(() => 
     generateSalesData(subDays(new Date(), 6), new Date())
   );
@@ -79,7 +81,18 @@ const Index = () => {
   const handleDateSelect = (newDate: Date | undefined) => {
     setDate(newDate);
     if (newDate) {
-      setSalesData(generateSalesData(subDays(newDate, 6), newDate));
+      setSalesData(generateSalesData(subDays(newDate, 6), newDate, selectedMachine));
+    }
+  };
+
+  const handleMachineSelect = (machineId: string) => {
+    setSelectedMachine(machineId === selectedMachine ? null : machineId);
+    if (date) {
+      setSalesData(generateSalesData(
+        subDays(date, 6),
+        date,
+        machineId === selectedMachine ? undefined : machineId
+      ));
     }
   };
 
@@ -112,7 +125,11 @@ const Index = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Sales Overview</CardTitle>
+            <CardTitle>
+              {selectedMachine 
+                ? `Sales Overview - ${mockMachines.find(m => m.id === selectedMachine)?.name}`
+                : 'Sales Overview - All Machines'}
+            </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ChartContainer config={{}}>
@@ -121,9 +138,7 @@ const Index = () => {
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Bar dataKey="sales" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                  <ChartTooltip>
-                    <ChartTooltipContent />
-                  </ChartTooltip>
+                  <Tooltip />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -133,7 +148,12 @@ const Index = () => {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredMachines.map((machine) => (
-          <VendingMachineCard key={machine.id} {...machine} />
+          <VendingMachineCard 
+            key={machine.id} 
+            {...machine} 
+            isSelected={machine.id === selectedMachine}
+            onClick={() => handleMachineSelect(machine.id)}
+          />
         ))}
       </div>
     </div>
