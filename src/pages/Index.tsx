@@ -5,9 +5,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
-import { addDays, format, subDays } from "date-fns";
+import { addDays, format, subDays, eachDayOfInterval } from "date-fns";
+import { DateRange } from "react-day-picker";
 
-// Mock data - in a real app, this would come from an API
 const mockMachines = [
   {
     id: "vm1",
@@ -50,23 +50,25 @@ const mockMachines = [
 // Mock sales data
 const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) => {
   const data = [];
-  let currentDate = startDate;
+  const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
   const multiplier = machineId ? parseInt(machineId.replace('vm', '')) : 1;
   
-  while (currentDate <= endDate) {
+  dateRange.forEach(date => {
     data.push({
-      date: format(currentDate, 'MMM dd'),
+      date: format(date, 'MMM dd'),
       sales: Math.floor((Math.random() * 100 + 20) * multiplier),
     });
-    currentDate = addDays(currentDate, 1);
-  }
+  });
   
   return data;
 };
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 6),
+    to: new Date()
+  });
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [salesData, setSalesData] = useState(() => 
     generateSalesData(subDays(new Date(), 6), new Date())
@@ -78,19 +80,19 @@ const Index = () => {
       machine.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDateSelect = (newDate: Date | undefined) => {
+  const handleDateSelect = (newDate: DateRange | undefined) => {
     setDate(newDate);
-    if (newDate) {
-      setSalesData(generateSalesData(subDays(newDate, 6), newDate, selectedMachine));
+    if (newDate?.from && newDate?.to) {
+      setSalesData(generateSalesData(newDate.from, newDate.to, selectedMachine));
     }
   };
 
   const handleMachineSelect = (machineId: string) => {
     setSelectedMachine(machineId === selectedMachine ? null : machineId);
-    if (date) {
+    if (date?.from && date?.to) {
       setSalesData(generateSalesData(
-        subDays(date, 6),
-        date,
+        date.from,
+        date.to,
         machineId === selectedMachine ? undefined : machineId
       ));
     }
@@ -114,9 +116,10 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <Calendar
-                mode="single"
+                mode="range"
                 selected={date}
                 onSelect={handleDateSelect}
+                numberOfMonths={1}
                 className="rounded-md border"
               />
             </CardContent>
