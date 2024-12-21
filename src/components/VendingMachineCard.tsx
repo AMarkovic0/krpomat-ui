@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 
 interface VendingMachineCardProps {
   id: string;
@@ -69,7 +69,7 @@ export function VendingMachineCard({
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Last Seen</span>
             <span className="text-sm font-medium">
-              {formatDistanceToNow(lastSeen, { addSuffix: true })}
+              {format(lastSeen, 'dd/MM/yy')}
             </span>
           </div>
           <div className="w-full bg-secondary rounded-full h-2.5">
