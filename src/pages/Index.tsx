@@ -2,20 +2,11 @@ import { useState } from "react";
 import { VendingMachineCard } from "@/components/VendingMachineCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Calendar } from "@/components/ui/calendar";
-import { ChartContainer } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { addDays, format, subDays, eachDayOfInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { cn } from "@/lib/utils";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 
 const mockMachines = [
   {
@@ -72,18 +63,6 @@ const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) =
   return data;
 };
 
-const ITEMS_PER_PAGE = 6;
-
-const chartConfig = {
-  sales: {
-    label: "Sales",
-    theme: {
-      light: "#2563eb",
-      dark: "#3b82f6",
-    },
-  },
-};
-
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [date, setDate] = useState<DateRange | undefined>({
@@ -94,18 +73,11 @@ const Index = () => {
   const [salesData, setSalesData] = useState(() => 
     generateSalesData(subDays(new Date(), 6), new Date())
   );
-  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredMachines = mockMachines.filter(
     (machine) =>
       machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       machine.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredMachines.length / ITEMS_PER_PAGE);
-  const paginatedMachines = filteredMachines.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
   );
 
   const handleDateSelect = (newDate: DateRange | undefined) => {
@@ -163,7 +135,7 @@ const Index = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ChartContainer config={chartConfig}>
+            <ChartContainer config={{}}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={salesData}>
                   <XAxis dataKey="date" />
@@ -177,8 +149,8 @@ const Index = () => {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-4">
-        {paginatedMachines.map((machine) => (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredMachines.map((machine) => (
           <VendingMachineCard 
             key={machine.id} 
             {...machine} 
@@ -187,35 +159,6 @@ const Index = () => {
           />
         ))}
       </div>
-
-      {totalPages > 1 && (
-        <Pagination className="mt-4">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className={cn(currentPage === 1 && "pointer-events-none opacity-50")}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={() => setCurrentPage(page)}
-                  isActive={currentPage === page}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext 
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className={cn(currentPage === totalPages && "pointer-events-none opacity-50")}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
     </div>
   );
 };
