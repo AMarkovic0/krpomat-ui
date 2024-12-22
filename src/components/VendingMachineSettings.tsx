@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Settings } from "lucide-react";
-import { useState } from "react";
+import MuiPhoneNumber from "mui-phone-number";
 
 interface VendingMachineSettingsProps {
   id: string;
@@ -30,13 +31,8 @@ export function VendingMachineSettings({
   const [slots, setSlots] = useState(initialSlots.toString());
   const [open, setOpen] = useState(false);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 10) {
-      const areaCode = value.slice(0, 3);
-      const mainNumber = value.slice(3);
-      setPhone(value ? `${areaCode}${mainNumber ? `-${mainNumber}` : ''}` : '');
-    }
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
   };
 
   const handleSave = () => {
@@ -84,14 +80,15 @@ export function VendingMachineSettings({
             <label htmlFor="phone" className="text-right">
               Phone
             </label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={handlePhoneChange}
-              placeholder="000-0000000"
-              className="col-span-3"
-              type="tel"
-            />
+            <div className="col-span-3">
+              <MuiPhoneNumber
+                defaultCountry="rs"
+                value={phone}
+                onChange={handlePhoneChange}
+                variant="outlined"
+                fullWidth
+              />
+            </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="slots" className="text-right">

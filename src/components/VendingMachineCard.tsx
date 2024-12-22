@@ -46,8 +46,8 @@ export function VendingMachineCard({
       )}
       onClick={onClick}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center justify-between w-full">
+      <CardHeader className="pb-2">
+        <div className="flex flex-col space-y-2">
           <CardTitle className="text-lg font-bold">{name}</CardTitle>
           <div className="flex items-center space-x-2">
             <div
