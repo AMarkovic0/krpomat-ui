@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { addDays, format, subDays, eachDayOfInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
 import {
   Pagination,
   PaginationContent,
@@ -72,6 +73,16 @@ const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) =
 };
 
 const ITEMS_PER_PAGE = 6;
+
+const chartConfig = {
+  sales: {
+    label: "Sales",
+    theme: {
+      light: "#2563eb",
+      dark: "#3b82f6",
+    },
+  },
+};
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,7 +163,7 @@ const Index = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
-            <ChartContainer>
+            <ChartContainer config={chartConfig}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={salesData}>
                   <XAxis dataKey="date" />
