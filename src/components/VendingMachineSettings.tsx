@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Settings } from "lucide-react";
-import MuiPhoneNumber from "mui-phone-number";
+import MuiPhoneNumber, { MaterialPhoneNumberProps } from "mui-phone-number";
 
 interface VendingMachineSettingsProps {
   id: string;
@@ -84,7 +84,7 @@ export function VendingMachineSettings({
               <MuiPhoneNumber
                 defaultCountry="rs"
                 value={phone}
-                onChange={handlePhoneChange}
+                onChange={handlePhoneChange as MaterialPhoneNumberProps['onChange']}
                 variant="outlined"
                 fullWidth
               />
