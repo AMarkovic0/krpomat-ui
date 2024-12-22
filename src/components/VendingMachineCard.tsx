@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { VendingMachineSettings } from "./VendingMachineSettings";
 
 interface VendingMachineCardProps {
   id: string;
@@ -31,7 +32,7 @@ export function VendingMachineCard({
   return (
     <Card 
       className={cn(
-        "hover:shadow-lg transition-shadow cursor-pointer",
+        "hover:shadow-lg transition-shadow cursor-pointer relative",
         isSelected && "ring-2 ring-primary"
       )}
       onClick={onClick}
@@ -83,6 +84,11 @@ export function VendingMachineCard({
           </div>
         </div>
       </CardContent>
+      <VendingMachineSettings
+        id={id}
+        initialName={name}
+        initialSlots={totalSlots}
+      />
     </Card>
   );
 }
