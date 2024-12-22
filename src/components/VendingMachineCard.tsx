@@ -21,13 +21,21 @@ export function VendingMachineCard({
   location,
   isOnline,
   lastSeen,
-  stockLevel,
-  totalSlots,
+  stockLevel: initialStockLevel,
+  totalSlots: initialTotalSlots,
   isSelected,
   onClick,
 }: VendingMachineCardProps) {
+  const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
+  const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
+  
   const stockPercentage = (stockLevel / totalSlots) * 100;
   const isLowStock = stockPercentage < 20;
+
+  const handleSettingsUpdate = (newSlots: number) => {
+    setTotalSlots(newSlots);
+    setStockLevel(Math.min(stockLevel, newSlots));
+  };
 
   return (
     <Card 
@@ -38,18 +46,20 @@ export function VendingMachineCard({
       onClick={onClick}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-bold">{name}</CardTitle>
-        <div className="flex items-center space-x-2">
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full",
-              isOnline && "bg-green-500 animate-pulse",
-              !isOnline && "bg-red-500"
-            )}
-          />
-          <span className="text-sm text-muted-foreground">
-            {isOnline ? "Online" : "Offline"}
-          </span>
+        <div className="flex items-center justify-between w-full">
+          <CardTitle className="text-lg font-bold">{name}</CardTitle>
+          <div className="flex items-center space-x-2">
+            <div
+              className={cn(
+                "h-2 w-2 rounded-full",
+                isOnline && "bg-green-500 animate-pulse",
+                !isOnline && "bg-red-500"
+              )}
+            />
+            <span className="text-sm text-muted-foreground">
+              {isOnline ? "Online" : "Offline"}
+            </span>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -88,6 +98,7 @@ export function VendingMachineCard({
         id={id}
         initialName={name}
         initialSlots={totalSlots}
+        onSave={handleSettingsUpdate}
       />
     </Card>
   );

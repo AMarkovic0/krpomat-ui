@@ -15,6 +15,7 @@ interface VendingMachineSettingsProps {
   initialName: string;
   initialPhone?: string;
   initialSlots: number;
+  onSave?: (newSlots: number) => void;
 }
 
 export function VendingMachineSettings({
@@ -22,27 +23,39 @@ export function VendingMachineSettings({
   initialName,
   initialPhone = "",
   initialSlots,
+  onSave,
 }: VendingMachineSettingsProps) {
   const [name, setName] = useState(initialName);
   const [phone, setPhone] = useState(initialPhone);
   const [slots, setSlots] = useState(initialSlots.toString());
+  const [open, setOpen] = useState(false);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 10) {
+      const areaCode = value.slice(0, 3);
+      const mainNumber = value.slice(3);
+      setPhone(value ? `${areaCode}${mainNumber ? `-${mainNumber}` : ''}` : '');
+    }
+  };
 
   const handleSave = () => {
-    // Here you would typically save the settings to your backend
     console.log("Saving settings for machine", id, {
       name,
       phone,
       slots: parseInt(slots),
     });
+    onSave?.(parseInt(slots));
+    setOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-14 h-8 w-8"
+          className="absolute top-2 right-2 h-8 w-8"
           onClick={(e) => e.stopPropagation()}
         >
           <Settings className="h-4 w-4" />
@@ -74,7 +87,8 @@ export function VendingMachineSettings({
             <Input
               id="phone"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
+              placeholder="000-0000000"
               className="col-span-3"
               type="tel"
             />
