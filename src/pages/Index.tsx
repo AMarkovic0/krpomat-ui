@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { VendingMachineCard } from "@/components/VendingMachineCard";
 import { SearchBar } from "@/components/SearchBar";
 import { Calendar } from "@/components/ui/calendar";
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { addDays, format, subDays, eachDayOfInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { VendingMachineGrid } from "@/components/VendingMachineGrid";
 
 const mockMachines = [
   {
@@ -185,16 +185,11 @@ const Index = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredMachines.map((machine) => (
-          <VendingMachineCard
-            key={machine.id}
-            {...machine}
-            isSelected={machine.id === selectedMachine}
-            onClick={() => handleMachineSelect(machine.id)}
-          />
-        ))}
-      </div>
+      <VendingMachineGrid
+        machines={filteredMachines}
+        selectedMachine={selectedMachine}
+        onMachineSelect={handleMachineSelect}
+      />
     </div>
   );
 };
