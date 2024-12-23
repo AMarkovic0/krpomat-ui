@@ -1,6 +1,8 @@
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Pagination,
   PaginationContent,
@@ -33,10 +35,25 @@ export function VendingMachineGrid({
   onMachineSelect,
 }: VendingMachineGridProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [showOffline, setShowOffline] = React.useState(false);
+  const [showEmptyStock, setShowEmptyStock] = React.useState(false);
   const itemsPerPage = 6;
-  const totalPages = Math.ceil(machines.length / itemsPerPage);
 
-  const paginatedMachines = machines.slice(
+  const filteredMachines = machines.filter((machine) => {
+    if (showOffline && !showEmptyStock) {
+      return !machine.isOnline;
+    }
+    if (!showOffline && showEmptyStock) {
+      return machine.isOnline && machine.stockLevel === 0;
+    }
+    if (showOffline && showEmptyStock) {
+      return !machine.isOnline || (machine.isOnline && machine.stockLevel === 0);
+    }
+    return true;
+  });
+
+  const totalPages = Math.ceil(filteredMachines.length / itemsPerPage);
+  const paginatedMachines = filteredMachines.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -47,10 +64,43 @@ export function VendingMachineGrid({
 
   return (
     <div className="space-y-6">
-      <div className="relative border border-gray-200 rounded-lg p-6">
-        <div className="absolute -top-3 -left-3 bg-white p-1 rounded-full border border-gray-200">
+      <div className="flex items-center gap-6 mb-4">
+        <Button variant="outline" className="relative bg-white">
           <Plus className="h-5 w-5 text-green-500" />
+        </Button>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="offline"
+              checked={showOffline}
+              onCheckedChange={(checked) => setShowOffline(checked as boolean)}
+            />
+            <label
+              htmlFor="offline"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Show Offline
+            </label>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="empty"
+              checked={showEmptyStock}
+              onCheckedChange={(checked) => setShowEmptyStock(checked as boolean)}
+            />
+            <label
+              htmlFor="empty"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Show Empty Stock
+            </label>
+          </div>
         </div>
+      </div>
+
+      <div className="relative border border-gray-200 rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {paginatedMachines.map((machine) => (
             <VendingMachineCard
