@@ -88,14 +88,14 @@ const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) =
   const data = [];
   const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
   const multiplier = machineId ? parseInt(machineId.replace('vm', '')) : 1;
-  
+
   dateRange.forEach(date => {
     data.push({
       date: format(date, 'MMM dd'),
       sales: Math.floor((Math.random() * 100 + 20) * multiplier),
     });
   });
-  
+
   return data;
 };
 
@@ -106,7 +106,7 @@ const Index = () => {
     to: new Date()
   });
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
-  const [salesData, setSalesData] = useState(() => 
+  const [salesData, setSalesData] = useState(() =>
     generateSalesData(subDays(new Date(), 6), new Date())
   );
 
@@ -165,7 +165,7 @@ const Index = () => {
         <Card>
           <CardHeader>
             <CardTitle>
-              {selectedMachine 
+              {selectedMachine
                 ? `Sales Overview - ${mockMachines.find(m => m.id === selectedMachine)?.name}`
                 : 'Sales Overview - All Machines'}
             </CardTitle>
@@ -187,9 +187,9 @@ const Index = () => {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredMachines.map((machine) => (
-          <VendingMachineCard 
-            key={machine.id} 
-            {...machine} 
+          <VendingMachineCard
+            key={machine.id}
+            {...machine}
             isSelected={machine.id === selectedMachine}
             onClick={() => handleMachineSelect(machine.id)}
           />
