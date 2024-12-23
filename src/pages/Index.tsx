@@ -46,8 +46,8 @@ const mockMachines = [
     totalSlots: 20,
   },
   {
-    id: "vm1",
-    name: "Snack Machine 1",
+    id: "vm5",
+    name: "Snack Machine 3",
     location: "Building A, Floor 1",
     isOnline: true,
     lastSeen: new Date(),
@@ -55,8 +55,8 @@ const mockMachines = [
     totalSlots: 20,
   },
   {
-    id: "vm2",
-    name: "Drink Machine 1",
+    id: "vm6",
+    name: "Drink Machine 2",
     location: "Building B, Floor 2",
     isOnline: false,
     lastSeen: new Date(Date.now() - 86400000), // 1 day ago
@@ -64,8 +64,8 @@ const mockMachines = [
     totalSlots: 24,
   },
   {
-    id: "vm3",
-    name: "Combo Machine 1",
+    id: "vm7",
+    name: "Combo Machine 2",
     location: "Building C, Floor 1",
     isOnline: true,
     lastSeen: new Date(),
@@ -73,8 +73,8 @@ const mockMachines = [
     totalSlots: 30,
   },
   {
-    id: "vm4",
-    name: "Snack Machine 2",
+    id: "vm8",
+    name: "Snack Machine 4",
     location: "Building A, Floor 3",
     isOnline: true,
     lastSeen: new Date(),
