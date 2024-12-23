@@ -1,5 +1,6 @@
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
+import { Plus } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -46,15 +47,20 @@ export function VendingMachineGrid({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {paginatedMachines.map((machine) => (
-          <VendingMachineCard
-            key={machine.id}
-            {...machine}
-            isSelected={machine.id === selectedMachine}
-            onClick={() => onMachineSelect(machine.id)}
-          />
-        ))}
+      <div className="relative border border-gray-200 rounded-lg p-6">
+        <div className="absolute -top-3 -left-3 bg-white p-1 rounded-full border border-gray-200">
+          <Plus className="h-5 w-5 text-green-500" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedMachines.map((machine) => (
+            <VendingMachineCard
+              key={machine.id}
+              {...machine}
+              isSelected={machine.id === selectedMachine}
+              onClick={() => onMachineSelect(machine.id)}
+            />
+          ))}
+        </div>
       </div>
 
       <Pagination>
