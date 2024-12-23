@@ -45,6 +45,42 @@ const mockMachines = [
     stockLevel: 18,
     totalSlots: 20,
   },
+  {
+    id: "vm1",
+    name: "Snack Machine 1",
+    location: "Building A, Floor 1",
+    isOnline: true,
+    lastSeen: new Date(),
+    stockLevel: 15,
+    totalSlots: 20,
+  },
+  {
+    id: "vm2",
+    name: "Drink Machine 1",
+    location: "Building B, Floor 2",
+    isOnline: false,
+    lastSeen: new Date(Date.now() - 86400000), // 1 day ago
+    stockLevel: 8,
+    totalSlots: 24,
+  },
+  {
+    id: "vm3",
+    name: "Combo Machine 1",
+    location: "Building C, Floor 1",
+    isOnline: true,
+    lastSeen: new Date(),
+    stockLevel: 4,
+    totalSlots: 30,
+  },
+  {
+    id: "vm4",
+    name: "Snack Machine 2",
+    location: "Building A, Floor 3",
+    isOnline: true,
+    lastSeen: new Date(),
+    stockLevel: 18,
+    totalSlots: 20,
+  },
 ];
 
 // Mock sales data
