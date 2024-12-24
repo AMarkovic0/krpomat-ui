@@ -43,25 +43,29 @@ const Index = () => {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8 space-y-4">
-        <h1 className="text-3xl font-bold">Vending Machines Dashboard</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto py-4 px-2 sm:py-8 sm:px-4">
+      <div className="mb-6 space-y-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Vending Machines Dashboard</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
           Monitor the status and stock levels of all vending machines
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 mb-6">
-        <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2 mb-6">
+        <div className="space-y-4 order-2 lg:order-1">
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          <DateSelector date={date} onSelect={handleDateSelect} />
+          <div className="w-full overflow-x-auto">
+            <DateSelector date={date} onSelect={handleDateSelect} />
+          </div>
         </div>
 
-        <SalesOverviewChart 
-          salesData={salesData}
-          selectedMachine={selectedMachine}
-          machines={mockMachines}
-        />
+        <div className="w-full overflow-x-auto order-1 lg:order-2">
+          <SalesOverviewChart 
+            salesData={salesData}
+            selectedMachine={selectedMachine}
+            machines={mockMachines}
+          />
+        </div>
       </div>
 
       <VendingMachineGrid

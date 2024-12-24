@@ -13,22 +13,22 @@ interface SalesOverviewChartProps {
 
 export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: SalesOverviewChartProps) => {
   return (
-    <Card>
+    <Card className="min-w-[300px]">
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="text-base sm:text-lg">
           {selectedMachine
             ? `Sales Overview - ${machines.find(m => m.id === selectedMachine)?.name}`
             : 'Sales Overview - All Machines'}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[300px]">
+      <CardContent className="h-[250px] sm:h-[300px]">
         <ChartContainer config={{}}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={salesData}>
-              <XAxis dataKey="date" />
-              <YAxis />
+            <BarChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '12px' }} />
               <Bar dataKey="slot1" stackId="a" fill="#8884d8" name="Slot 1" radius={[4, 4, 0, 0]} />
               <Bar dataKey="slot2" stackId="a" fill="#82ca9d" name="Slot 2" radius={[4, 4, 0, 0]} />
               <Bar dataKey="slot3" stackId="a" fill="#ffc658" name="Slot 3" radius={[4, 4, 0, 0]} />
