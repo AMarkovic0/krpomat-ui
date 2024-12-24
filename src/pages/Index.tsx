@@ -3,7 +3,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { Calendar } from "@/components/ui/calendar";
 import { ChartContainer } from "@/components/ui/chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { addDays, format, subDays, eachDayOfInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { VendingMachineGrid } from "@/components/VendingMachineGrid";
@@ -83,17 +83,24 @@ const mockMachines = [
   },
 ];
 
-// Mock sales data
+// Generate mock sales data with slot-specific information
 const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) => {
   const data = [];
   const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
   const multiplier = machineId ? parseInt(machineId.replace('vm', '')) : 1;
+  const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
   dateRange.forEach(date => {
-    data.push({
+    const dailyData: any = {
       date: format(date, 'MMM dd'),
-      sales: Math.floor((Math.random() * 100 + 20) * multiplier),
-    });
+    };
+
+    // Generate sales data for each slot
+    for (let slot = 1; slot <= 5; slot++) {
+      dailyData[`slot${slot}`] = Math.floor((Math.random() * 20 + 5) * multiplier);
+    }
+
+    data.push(dailyData);
   });
 
   return data;
@@ -176,8 +183,13 @@ const Index = () => {
                 <BarChart data={salesData}>
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <Bar dataKey="sales" fill="#2563eb" radius={[4, 4, 0, 0]} />
                   <Tooltip />
+                  <Legend />
+                  <Bar dataKey="slot1" stackId="a" fill="#8884d8" name="Slot 1" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="slot2" stackId="a" fill="#82ca9d" name="Slot 2" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="slot3" stackId="a" fill="#ffc658" name="Slot 3" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="slot4" stackId="a" fill="#ff7300" name="Slot 4" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="slot5" stackId="a" fill="#a4de6c" name="Slot 5" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
