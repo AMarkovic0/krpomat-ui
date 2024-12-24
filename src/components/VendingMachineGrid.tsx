@@ -1,8 +1,7 @@
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AddMachineDialog } from "./AddMachineDialog";
 import {
   Pagination,
   PaginationContent,
@@ -39,6 +38,28 @@ export function VendingMachineGrid({
   const [showEmptyStock, setShowEmptyStock] = React.useState(false);
   const itemsPerPage = 6;
 
+  const handleAddMachine = (newMachine: {
+    userName: string;
+    name: string;
+    id: string;
+    totalSlots: number;
+    phone: string;
+  }) => {
+    // Create a new machine with default values and user input
+    const machine: VendingMachine = {
+      id: newMachine.id,
+      name: newMachine.name,
+      location: "New Location", // Default value
+      isOnline: true, // Default value
+      lastSeen: new Date(),
+      stockLevel: 0, // Default value
+      totalSlots: newMachine.totalSlots,
+    };
+    
+    // Add the new machine to the list (you might want to handle this in the parent component)
+    console.log("New machine created:", machine);
+  };
+
   const filteredMachines = machines.filter((machine) => {
     if (showOffline && !showEmptyStock) {
       return !machine.isOnline;
@@ -65,9 +86,7 @@ export function VendingMachineGrid({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-6 mb-4">
-        <Button variant="outline" className="relative bg-white">
-          <Plus className="h-5 w-5 text-green-500" />
-        </Button>
+        <AddMachineDialog onConfirm={handleAddMachine} />
         
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
