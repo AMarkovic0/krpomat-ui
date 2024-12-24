@@ -61,6 +61,7 @@ export function VendingMachineGrid({
   };
 
   const filteredMachines = machines.filter((machine) => {
+    // First apply offline/empty stock filters
     if (showOffline && !showEmptyStock) {
       return !machine.isOnline;
     }
