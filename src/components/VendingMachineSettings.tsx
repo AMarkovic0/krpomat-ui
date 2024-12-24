@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Settings } from "lucide-react";
-import MuiPhoneNumber, { MuiPhoneNumberProps } from "mui-phone-number";
 
 interface VendingMachineSettingsProps {
   id: string;
@@ -31,7 +31,9 @@ export function VendingMachineSettings({
   const [slots, setSlots] = useState(initialSlots.toString());
   const [open, setOpen] = useState(false);
 
-  const handlePhoneChange = (value: string) => {
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow numbers and basic phone number characters
+    const value = e.target.value.replace(/[^\d+\-() ]/g, '');
     setPhone(value);
   };
 
@@ -63,6 +65,9 @@ export function VendingMachineSettings({
       >
         <DialogHeader>
           <DialogTitle>Machine Settings</DialogTitle>
+          <DialogDescription>
+            Configure the vending machine settings. Click save when you're done.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -80,15 +85,14 @@ export function VendingMachineSettings({
             <label htmlFor="phone" className="text-right">
               Phone
             </label>
-            <div className="col-span-3">
-              <MuiPhoneNumber
-                defaultCountry="rs"
-                value={phone}
-                onChange={handlePhoneChange as MuiPhoneNumberProps['onChange']}
-                variant="outlined"
-                fullWidth
-              />
-            </div>
+            <Input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={handlePhoneChange}
+              placeholder="+1 (234) 567-8900"
+              className="col-span-3"
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="slots" className="text-right">
