@@ -7,8 +7,8 @@ export const mockMachines = [
     location: "Building A, Floor 1",
     isOnline: true,
     lastSeen: new Date(),
-    stockLevel: 15,
-    totalSlots: 20,
+    stockLevel: 2,
+    totalSlots: 4,
   },
   {
     id: "vm2",
@@ -16,8 +16,8 @@ export const mockMachines = [
     location: "Building B, Floor 2",
     isOnline: false,
     lastSeen: new Date(Date.now() - 86400000), // 1 day ago
-    stockLevel: 8,
-    totalSlots: 24,
+    stockLevel: 1,
+    totalSlots: 5,
   },
   {
     id: "vm3",
@@ -25,8 +25,8 @@ export const mockMachines = [
     location: "Building C, Floor 1",
     isOnline: true,
     lastSeen: new Date(),
-    stockLevel: 4,
-    totalSlots: 30,
+    stockLevel: 5,
+    totalSlots: 5,
   },
   {
     id: "vm4",
@@ -34,8 +34,8 @@ export const mockMachines = [
     location: "Building A, Floor 3",
     isOnline: true,
     lastSeen: new Date(),
-    stockLevel: 18,
-    totalSlots: 20,
+    stockLevel: 1,
+    totalSlots: 1,
   },
   {
     id: "vm5",
@@ -43,8 +43,8 @@ export const mockMachines = [
     location: "Building A, Floor 1",
     isOnline: true,
     lastSeen: new Date(),
-    stockLevel: 15,
-    totalSlots: 20,
+    stockLevel: 0,
+    totalSlots: 1,
   },
   {
     id: "vm6",
@@ -52,8 +52,8 @@ export const mockMachines = [
     location: "Building B, Floor 2",
     isOnline: false,
     lastSeen: new Date(Date.now() - 86400000), // 1 day ago
-    stockLevel: 8,
-    totalSlots: 24,
+    stockLevel: 0,
+    totalSlots: 2,
   },
   {
     id: "vm7",
@@ -61,8 +61,8 @@ export const mockMachines = [
     location: "Building C, Floor 1",
     isOnline: true,
     lastSeen: new Date(),
-    stockLevel: 4,
-    totalSlots: 30,
+    stockLevel: 3,
+    totalSlots: 3,
   },
   {
     id: "vm8",
@@ -70,8 +70,8 @@ export const mockMachines = [
     location: "Building A, Floor 3",
     isOnline: true,
     lastSeen: new Date(),
-    stockLevel: 18,
-    totalSlots: 20,
+    stockLevel: 4,
+    totalSlots: 5,
   },
 ];
 
