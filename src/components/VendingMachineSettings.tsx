@@ -37,6 +37,13 @@ export function VendingMachineSettings({
     setPhone(value);
   };
 
+  const handleSlotsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 1 && value <= 5) {
+      setSlots(e.target.value);
+    }
+  };
+
   const handleSave = () => {
     console.log("Saving settings for machine", id, {
       name,
@@ -96,15 +103,16 @@ export function VendingMachineSettings({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="slots" className="text-right">
-              Slots
+              Slots (1-5)
             </label>
             <Input
               id="slots"
               value={slots}
-              onChange={(e) => setSlots(e.target.value)}
+              onChange={handleSlotsChange}
               className="col-span-3"
               type="number"
               min="1"
+              max="5"
             />
           </div>
         </div>
