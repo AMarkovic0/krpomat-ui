@@ -30,8 +30,8 @@ export function VendingMachineCard({
   const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
   const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
   
-  const missingSlots = totalSlots - stockLevel;
-  const isLowStock = (stockLevel / totalSlots) * 100 < 20;
+  const stockPercentage = (stockLevel / totalSlots) * 100;
+  const isLowStock = stockPercentage < 20;
 
   const handleSettingsUpdate = (newSlots: number) => {
     setTotalSlots(newSlots);
@@ -75,7 +75,7 @@ export function VendingMachineCard({
               "text-sm font-medium",
               isLowStock && "text-red-500"
             )}>
-              {missingSlots > 0 ? `${missingSlots} slots empty` : "All slots filled"}
+              {stockLevel}/{totalSlots} slots filled
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -83,6 +83,15 @@ export function VendingMachineCard({
             <span className="text-sm font-medium">
               {format(lastSeen, 'dd/MM/yy')}
             </span>
+          </div>
+          <div className="w-full bg-secondary rounded-full h-2.5">
+            <div
+              className={cn(
+                "h-2.5 rounded-full",
+                stockPercentage > 20 ? "bg-blue-600" : "bg-red-500"
+              )}
+              style={{ width: `${stockPercentage}%` }}
+            ></div>
           </div>
         </div>
       </CardContent>
