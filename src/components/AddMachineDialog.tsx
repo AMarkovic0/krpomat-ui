@@ -34,6 +34,13 @@ export function AddMachineDialog({ onConfirm }: AddMachineDialogProps) {
     setPhone(value);
   };
 
+  const handleSlotsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 1 && value <= 5) {
+      setSlots(e.target.value);
+    }
+  };
+
   const handleConfirm = () => {
     onConfirm({
       userName,
@@ -101,14 +108,15 @@ export function AddMachineDialog({ onConfirm }: AddMachineDialogProps) {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="slots" className="text-right">
-              Slots
+              Slots (1-5)
             </label>
             <Input
               id="slots"
               type="number"
               min="1"
+              max="5"
               value={slots}
-              onChange={(e) => setSlots(e.target.value)}
+              onChange={handleSlotsChange}
               className="col-span-3"
             />
           </div>
