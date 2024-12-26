@@ -45,7 +45,6 @@ export function VendingMachineGrid({
     totalSlots: number;
     phone: string;
   }) => {
-    // Create a new machine with default values and user input
     const machine: VendingMachine = {
       id: newMachine.id,
       name: newMachine.name,
@@ -56,20 +55,18 @@ export function VendingMachineGrid({
       totalSlots: newMachine.totalSlots,
     };
     
-    // Add the new machine to the list (you might want to handle this in the parent component)
     console.log("New machine created:", machine);
   };
 
   const filteredMachines = machines.filter((machine) => {
-    // First apply offline/empty stock filters
     if (showOffline && !showEmptyStock) {
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      return machine.isOnline && machine.stockLevel === 0;
+      return machine.isOnline && machine.stockLevel < machine.totalSlots;
     }
     if (showOffline && showEmptyStock) {
-      return !machine.isOnline || (machine.isOnline && machine.stockLevel === 0);
+      return !machine.isOnline || (machine.isOnline && machine.stockLevel < machine.totalSlots);
     }
     return true;
   });
