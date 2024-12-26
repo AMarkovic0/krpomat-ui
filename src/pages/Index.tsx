@@ -5,6 +5,7 @@ import { subDays } from "date-fns";
 import { VendingMachineGrid } from "@/components/VendingMachineGrid";
 import { SalesOverviewChart } from "@/components/SalesOverviewChart";
 import { DateSelector } from "@/components/DateSelector";
+import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
 import { mockMachines, generateSalesData } from "@/utils/mockData";
 
 const Index = () => {
@@ -66,6 +67,13 @@ const Index = () => {
             machines={mockMachines}
           />
         </div>
+      </div>
+
+      <div className="mb-6">
+        <OnlineStateTimeline
+          selectedMachine={selectedMachine}
+          machines={mockMachines}
+        />
       </div>
 
       <VendingMachineGrid
