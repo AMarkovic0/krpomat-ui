@@ -39,7 +39,10 @@ export const DateSelector = ({ date, onSelect }: DateSelectorProps) => {
         });
         break;
       case 'all':
-        onSelect(undefined);
+        onSelect({
+          from: new Date(2024, 0, 1), // January 1st, 2024
+          to: today
+        });
         break;
     }
   };
