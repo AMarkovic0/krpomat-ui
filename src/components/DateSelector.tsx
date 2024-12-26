@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
+import { subDays, subMonths, subYears, startOfDay } from "date-fns";
 
 interface DateSelectorProps {
   date: DateRange | undefined;
@@ -8,12 +10,83 @@ interface DateSelectorProps {
 }
 
 export const DateSelector = ({ date, onSelect }: DateSelectorProps) => {
+  const handleShortcutClick = (shortcut: string) => {
+    const today = startOfDay(new Date());
+    
+    switch (shortcut) {
+      case 'day':
+        onSelect({
+          from: subDays(today, 1),
+          to: today
+        });
+        break;
+      case 'week':
+        onSelect({
+          from: subDays(today, 7),
+          to: today
+        });
+        break;
+      case 'month':
+        onSelect({
+          from: subMonths(today, 1),
+          to: today
+        });
+        break;
+      case 'year':
+        onSelect({
+          from: subYears(today, 1),
+          to: today
+        });
+        break;
+      case 'all':
+        onSelect(undefined);
+        break;
+    }
+  };
+
   return (
     <Card className="min-w-[300px]">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg">Select Date Range</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShortcutClick('day')}
+          >
+            Last Day
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShortcutClick('week')}
+          >
+            Last Week
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShortcutClick('month')}
+          >
+            Last Month
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShortcutClick('year')}
+          >
+            Last Year
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleShortcutClick('all')}
+          >
+            All Time
+          </Button>
+        </div>
         <Calendar
           mode="range"
           selected={date}
