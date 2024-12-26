@@ -29,7 +29,7 @@ export function VendingMachineCard({
 }: VendingMachineCardProps) {
   const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
   const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
-  
+
   const stockPercentage = (stockLevel / totalSlots) * 100;
   const isLowStock = stockPercentage < 20;
 
@@ -39,7 +39,7 @@ export function VendingMachineCard({
   };
 
   return (
-    <Card 
+    <Card
       className={cn(
         "hover:shadow-lg transition-shadow cursor-pointer relative",
         isSelected && "ring-2 ring-primary"
@@ -83,15 +83,6 @@ export function VendingMachineCard({
             <span className="text-sm font-medium">
               {format(lastSeen, 'dd/MM/yy')}
             </span>
-          </div>
-          <div className="w-full bg-secondary rounded-full h-2.5">
-            <div
-              className={cn(
-                "h-2.5 rounded-full",
-                stockPercentage > 20 ? "bg-blue-600" : "bg-red-500"
-              )}
-              style={{ width: `${stockPercentage}%` }}
-            ></div>
           </div>
         </div>
       </CardContent>
