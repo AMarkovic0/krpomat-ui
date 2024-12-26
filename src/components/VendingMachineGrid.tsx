@@ -48,10 +48,10 @@ export function VendingMachineGrid({
     const machine: VendingMachine = {
       id: newMachine.id,
       name: newMachine.name,
-      location: "New Location", // Default value
-      isOnline: true, // Default value
+      location: "New Location",
+      isOnline: true,
       lastSeen: new Date(),
-      stockLevel: 0, // Default value
+      stockLevel: 0,
       totalSlots: newMachine.totalSlots,
     };
     
@@ -59,14 +59,16 @@ export function VendingMachineGrid({
   };
 
   const filteredMachines = machines.filter((machine) => {
+    const hasEmptySlots = machine.stockLevel < machine.totalSlots;
+    
     if (showOffline && !showEmptyStock) {
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      return machine.isOnline && machine.stockLevel < machine.totalSlots;
+      return hasEmptySlots;
     }
     if (showOffline && showEmptyStock) {
-      return !machine.isOnline || (machine.isOnline && machine.stockLevel < machine.totalSlots);
+      return !machine.isOnline || hasEmptySlots;
     }
     return true;
   });
