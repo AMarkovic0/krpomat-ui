@@ -12,6 +12,7 @@ interface VendingMachineCardProps {
   lastSeen: Date;
   stockLevel: number;
   totalSlots: number;
+  filledSlots?: number[];  // New prop to track which slots are filled
   isSelected?: boolean;
   onClick?: () => void;
 }
@@ -24,6 +25,7 @@ export function VendingMachineCard({
   lastSeen,
   stockLevel: initialStockLevel,
   totalSlots: initialTotalSlots,
+  filledSlots = [0, 2, 4], // Example default value showing slots 1, 3, and 5 are filled
   isSelected,
   onClick,
 }: VendingMachineCardProps) {
@@ -77,7 +79,7 @@ export function VendingMachineCard({
                   key={index}
                   className={cn(
                     "h-2 w-2 rounded-full",
-                    index < stockLevel
+                    filledSlots.includes(index)
                       ? "bg-primary"
                       : "bg-gray-200"
                   )}
