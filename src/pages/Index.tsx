@@ -53,14 +53,14 @@ const Index = () => {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 mb-6">
-        <div className="space-y-4 order-2 lg:order-1">
+        <div className="h-full flex flex-col space-y-4 order-2 lg:order-1">
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          <div className="w-full overflow-x-auto">
+          <div className="flex-grow">
             <DateSelector date={date} onSelect={handleDateSelect} />
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto order-1 lg:order-2">
+        <div className="h-full order-1 lg:order-2">
           <SalesOverviewChart 
             salesData={salesData}
             selectedMachine={selectedMachine}
