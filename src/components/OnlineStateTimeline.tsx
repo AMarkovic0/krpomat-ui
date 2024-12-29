@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 interface TimelineEvent {
-  machineId: string;
-  machineName: string;
   timestamp: Date;
-  isOnline: boolean;
+  status: number;
 }
 
 interface OnlineStateTimelineProps {
@@ -19,20 +18,48 @@ interface OnlineStateTimelineProps {
 }
 
 export const OnlineStateTimeline = ({ selectedMachine, machines }: OnlineStateTimelineProps) => {
-  // Generate mock timeline data based on machines' last seen timestamps
-  const generateTimelineEvents = (): TimelineEvent[] => {
-    return machines
-      .filter(machine => !selectedMachine || machine.id === selectedMachine)
-      .map(machine => ({
-        machineId: machine.id,
-        machineName: machine.name,
-        timestamp: machine.lastSeen,
-        isOnline: machine.isOnline,
-      }))
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  // Generate mock timeline data with more frequent status changes
+  const generateTimelineData = (): TimelineEvent[] => {
+    const selectedMachineData = machines.find(m => m.id === selectedMachine);
+    if (!selectedMachineData) return [];
+
+    const timelineData: TimelineEvent[] = [];
+    const endDate = new Date();
+    const startDate = subDays(endDate, 7); // Show last 7 days of data
+
+    // Generate random status changes
+    let currentTime = startDate;
+    let currentStatus = selectedMachineData.isOnline ? 1 : 0;
+
+    while (currentTime <= endDate) {
+      timelineData.push({
+        timestamp: new Date(currentTime),
+        status: currentStatus,
+      });
+
+      // Randomly change status (20% chance)
+      if (Math.random() < 0.2) {
+        currentStatus = currentStatus === 1 ? 0 : 1;
+      }
+
+      // Move forward by 4 hours
+      currentTime = new Date(currentTime.getTime() + 4 * 60 * 60 * 1000);
+    }
+
+    // Ensure the last status matches the current machine status
+    timelineData.push({
+      timestamp: endDate,
+      status: selectedMachineData.isOnline ? 1 : 0,
+    });
+
+    return timelineData;
   };
 
-  const timelineEvents = generateTimelineEvents();
+  const timelineData = generateTimelineData();
+  const formattedData = timelineData.map(event => ({
+    timestamp: format(event.timestamp, 'MM/dd HH:mm'),
+    status: event.status,
+  }));
 
   return (
     <Card className="min-w-[300px]">
@@ -40,34 +67,45 @@ export const OnlineStateTimeline = ({ selectedMachine, machines }: OnlineStateTi
         <CardTitle className="text-base sm:text-lg">
           {selectedMachine
             ? `Online Status Timeline - ${machines.find(m => m.id === selectedMachine)?.name}`
-            : 'Online Status Timeline - All Machines'}
+            : 'Select a machine to view its online status timeline'}
         </CardTitle>
       </CardHeader>
-      <CardContent className="relative">
-        <div className="space-y-4">
-          {timelineEvents.map((event, index) => (
-            <div key={`${event.machineId}-${index}`} className="flex items-start gap-4">
-              <div className="relative flex-none">
-                <div
-                  className={`h-3 w-3 rounded-full ${
-                    event.isOnline ? 'bg-green-500' : 'bg-red-500'
-                  }`}
+      <CardContent>
+        {selectedMachine ? (
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={formattedData}>
+                <XAxis
+                  dataKey="timestamp"
+                  tick={{ fontSize: 12 }}
+                  interval="preserveStartEnd"
                 />
-                {index < timelineEvents.length - 1 && (
-                  <div className="absolute left-1.5 top-3 h-full w-px bg-border" />
-                )}
-              </div>
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium leading-none">
-                  {event.machineName} - {event.isOnline ? 'Online' : 'Offline'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {format(event.timestamp, 'PPpp')}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+                <YAxis
+                  domain={[0, 1]}
+                  ticks={[0, 1]}
+                  tickFormatter={(value) => (value === 1 ? 'Online' : 'Offline')}
+                />
+                <Tooltip
+                  formatter={(value: number) => [
+                    value === 1 ? 'Online' : 'Offline',
+                    'Status'
+                  ]}
+                />
+                <Line
+                  type="stepAfter"
+                  dataKey="status"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-8">
+            Click on a machine card to view its online status timeline
+          </p>
+        )}
       </CardContent>
     </Card>
   );
