@@ -71,12 +71,19 @@ export function VendingMachineCard({
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Stock Level</span>
-            <span className={cn(
-              "text-sm font-medium",
-              isLowStock && "text-red-500"
-            )}>
-              {stockLevel}/{totalSlots} slots filled
-            </span>
+            <div className="flex gap-1">
+              {Array.from({ length: totalSlots }).map((_, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "h-2 w-2 rounded-full",
+                    index < stockLevel
+                      ? "bg-primary"
+                      : "bg-gray-200"
+                  )}
+                />
+              ))}
+            </div>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Last Seen</span>
