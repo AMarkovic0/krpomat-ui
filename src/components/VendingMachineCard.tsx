@@ -81,7 +81,7 @@ export function VendingMachineCard({
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Last Seen</span>
             <span className="text-sm font-medium">
-              {format(lastSeen, 'dd/MM/yy')}
+              {format(lastSeen, 'dd/MM/yyyy HH:mm:ss')}
             </span>
           </div>
         </div>
