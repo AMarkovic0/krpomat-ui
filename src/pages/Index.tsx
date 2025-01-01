@@ -54,7 +54,6 @@ const Index = () => {
 
       <div className="grid gap-4 lg:grid-cols-2 mb-6">
         <div className="h-full flex flex-col space-y-4 order-2 lg:order-1">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
           <div className="flex-grow">
             <DateSelector date={date} onSelect={handleDateSelect} />
           </div>
@@ -74,6 +73,10 @@ const Index = () => {
           selectedMachine={selectedMachine}
           machines={mockMachines}
         />
+      </div>
+
+      <div className="w-full mb-6">
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
       <VendingMachineGrid
