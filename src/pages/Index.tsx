@@ -53,8 +53,8 @@ const Index = () => {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 mb-6">
-        <div className="h-full flex flex-col space-y-4 order-2 lg:order-1">
-          <div className="flex-grow">
+        <div className="h-full flex flex-col order-2 lg:order-1">
+          <div className="flex-1">
             <DateSelector date={date} onSelect={handleDateSelect} />
           </div>
         </div>
