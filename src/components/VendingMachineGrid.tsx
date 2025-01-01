@@ -63,9 +63,11 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
+      // Show online machines that have any empty slots
       return machine.isOnline && machine.stockLevel < machine.totalSlots;
     }
     if (showOffline && showEmptyStock) {
+      // Show offline machines OR online machines with any empty slots
       return !machine.isOnline || (machine.isOnline && machine.stockLevel < machine.totalSlots);
     }
     return true;
