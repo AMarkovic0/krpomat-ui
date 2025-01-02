@@ -26,17 +26,35 @@ interface VendingMachineGridProps {
   machines: VendingMachine[];
   selectedMachine: string | null;
   onMachineSelect: (id: string) => void;
+  salesData: any[];
 }
 
 export function VendingMachineGrid({
   machines,
   selectedMachine,
   onMachineSelect,
+  salesData,
 }: VendingMachineGridProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showOffline, setShowOffline] = React.useState(false);
   const [showEmptyStock, setShowEmptyStock] = React.useState(false);
   const itemsPerPage = 6;
+
+  const calculateAverageSales = (machineId: string) => {
+    if (!salesData.length) return 0;
+    
+    const totalSales = salesData.reduce((acc, day) => {
+      let dailyTotal = 0;
+      for (let i = 1; i <= 5; i++) {
+        if (day[`slot${i}`]) {
+          dailyTotal += day[`slot${i}`];
+        }
+      }
+      return acc + dailyTotal;
+    }, 0);
+    
+    return totalSales / salesData.length;
+  };
 
   const handleAddMachine = (newMachine: {
     userName: string;
@@ -48,10 +66,10 @@ export function VendingMachineGrid({
     const machine: VendingMachine = {
       id: newMachine.id,
       name: newMachine.name,
-      location: "New Location", // Default value
-      isOnline: true, // Default value
+      location: "New Location",
+      isOnline: true,
       lastSeen: new Date(),
-      stockLevel: 0, // Default value
+      stockLevel: 0,
       totalSlots: newMachine.totalSlots,
     };
     
@@ -63,11 +81,9 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      // Show online machines that have any empty slots
       return machine.isOnline && machine.stockLevel < machine.totalSlots;
     }
     if (showOffline && showEmptyStock) {
-      // Show offline machines OR online machines with any empty slots
       return !machine.isOnline || (machine.isOnline && machine.stockLevel < machine.totalSlots);
     }
     return true;
@@ -127,6 +143,7 @@ export function VendingMachineGrid({
               {...machine}
               isSelected={machine.id === selectedMachine}
               onClick={() => onMachineSelect(machine.id)}
+              averageSales={calculateAverageSales(machine.id)}
             />
           ))}
         </div>

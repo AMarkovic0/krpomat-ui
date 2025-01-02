@@ -82,6 +82,7 @@ const Index = () => {
         machines={filteredMachines}
         selectedMachine={selectedMachine}
         onMachineSelect={handleMachineSelect}
+        salesData={salesData}
       />
     </div>
   );
