@@ -53,13 +53,11 @@ const Index = () => {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 mb-6">
-        <div className="h-full flex flex-col order-2 lg:order-1">
-          <div className="flex-1">
-            <DateSelector date={date} onSelect={handleDateSelect} />
-          </div>
+        <div className="flex flex-col order-2 lg:order-1 min-h-[300px]">
+          <DateSelector date={date} onSelect={handleDateSelect} />
         </div>
 
-        <div className="h-full order-1 lg:order-2">
+        <div className="flex flex-col order-1 lg:order-2 min-h-[300px]">
           <SalesOverviewChart 
             salesData={salesData}
             selectedMachine={selectedMachine}
