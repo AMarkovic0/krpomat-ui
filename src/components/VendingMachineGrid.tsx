@@ -43,7 +43,11 @@ export function VendingMachineGrid({
   const calculateAverageSales = (machineId: string) => {
     if (!salesData.length) return 0;
     
-    const totalSales = salesData.reduce((acc, day) => {
+    // Filter sales data for this specific machine
+    const machineSales = salesData.filter(sale => sale.machineId === machineId);
+    if (!machineSales.length) return 0;
+    
+    const totalSales = machineSales.reduce((acc, day) => {
       let dailyTotal = 0;
       for (let i = 1; i <= 5; i++) {
         if (day[`slot${i}`]) {
@@ -53,7 +57,7 @@ export function VendingMachineGrid({
       return acc + dailyTotal;
     }, 0);
     
-    return totalSales / salesData.length;
+    return totalSales / machineSales.length;
   };
 
   const handleAddMachine = (newMachine: {
