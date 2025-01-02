@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, subDays } from "date-fns";
+import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { DateRange } from "react-day-picker";
 
 interface TimelineEvent {
   timestamp: Date;
@@ -15,17 +16,18 @@ interface OnlineStateTimelineProps {
     isOnline: boolean;
     lastSeen: Date;
   }>;
+  dateRange: DateRange | undefined;
 }
 
-export const OnlineStateTimeline = ({ selectedMachine, machines }: OnlineStateTimelineProps) => {
+export const OnlineStateTimeline = ({ selectedMachine, machines, dateRange }: OnlineStateTimelineProps) => {
   // Generate mock timeline data with more frequent status changes
   const generateTimelineData = (): TimelineEvent[] => {
     const selectedMachineData = machines.find(m => m.id === selectedMachine);
-    if (!selectedMachineData) return [];
+    if (!selectedMachineData || !dateRange?.from || !dateRange?.to) return [];
 
     const timelineData: TimelineEvent[] = [];
-    const endDate = new Date();
-    const startDate = subDays(endDate, 7); // Show last 7 days of data
+    const endDate = dateRange.to;
+    const startDate = dateRange.from;
 
     // Generate random status changes
     let currentTime = startDate;

@@ -72,6 +72,7 @@ const Index = () => {
         <OnlineStateTimeline
           selectedMachine={selectedMachine}
           machines={mockMachines}
+          dateRange={date}
         />
       </div>
 
