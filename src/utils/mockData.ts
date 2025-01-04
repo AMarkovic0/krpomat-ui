@@ -86,15 +86,21 @@ const generateMachineSalesData = (startDate: Date, endDate: Date, machineId: str
   if (!machine) return [];
   
   const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
-  return dateRange.map(date => ({
-    date: format(date, 'MMM dd'),
-    machineId,
-    ...Array.from({ length: machine.totalSlots }).reduce((acc, _, idx) => {
-      const baseMin = parseInt(machineId.replace('vm', '')) * 2;
-      const baseMax = baseMin + 10;
-      return { ...acc, [`slot${idx + 1}`]: generateRandomSales(baseMin, baseMax) };
-    }, {})
-  }));
+  return dateRange.map(date => {
+    const baseMin = parseInt(machineId.replace('vm', '')) * 2;
+    const baseMax = baseMin + 10;
+    
+    const slotData: Record<string, number> = {};
+    for (let i = 0; i < machine.totalSlots; i++) {
+      slotData[`slot${i + 1}`] = generateRandomSales(baseMin, baseMax);
+    }
+
+    return {
+      date: format(date, 'MMM dd'),
+      machineId,
+      ...slotData
+    };
+  });
 };
 
 export const generateSalesData = (startDate: Date, endDate: Date, selectedMachineId?: string): any[] => {
@@ -111,12 +117,17 @@ export const generateSalesData = (startDate: Date, endDate: Date, selectedMachin
   const groupedByDate = Object.values(allData.reduce((acc: Record<string, any>, curr) => {
     const date = curr.date;
     if (!acc[date]) {
-      acc[date] = { date, ...Object.keys(curr).reduce((slots, key) => {
+      const slotData: Record<string, number> = {};
+      Object.keys(curr).forEach(key => {
         if (key.startsWith('slot')) {
-          slots[key] = 0;
+          slotData[key] = 0;
         }
-        return slots;
-      }, {}) };
+      });
+      
+      acc[date] = {
+        date,
+        ...slotData
+      };
     }
     
     Object.keys(curr).forEach(key => {
