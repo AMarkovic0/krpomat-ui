@@ -1,4 +1,4 @@
-import { format, eachDayOfInterval } from "date-fns";
+import { format, eachDayOfInterval, differenceInDays } from "date-fns";
 
 export const mockMachines = [
   {
@@ -157,5 +157,12 @@ export const calculateMachineAverageSales = (
     return sum + dailyTotal;
   }, 0);
 
-  return Number((totalSales / machineSales.length).toFixed(1));
+  // Calculate number of days in the range
+  const firstDay = machineSales[0]?.date;
+  const lastDay = machineSales[machineSales.length - 1]?.date;
+  
+  if (!firstDay || !lastDay) return 0;
+  
+  const numDays = machineSales.length;
+  return numDays > 0 ? Number((totalSales / numDays).toFixed(1)) : 0;
 };
