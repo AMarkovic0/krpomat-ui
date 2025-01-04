@@ -78,27 +78,19 @@ export const mockMachines = [
 export const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) => {
   const data = [];
   const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
+  const multiplier = machineId ? parseInt(machineId.replace('vm', '')) : 1;
+  const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
-  // Generate data for all machines if no specific machine is selected
-  const machineIds = machineId ? [machineId] : mockMachines.map(m => m.id);
+  dateRange.forEach(date => {
+    const dailyData: any = {
+      date: format(date, 'MMM dd'),
+    };
 
-  machineIds.forEach(id => {
-    dateRange.forEach(date => {
-      const dailyData: any = {
-        date: format(date, 'MMM dd'),
-        machineId: id,
-      };
+    for (let slot = 1; slot <= 5; slot++) {
+      dailyData[`slot${slot}`] = Math.floor((Math.random() * 20 + 5) * multiplier);
+    }
 
-      // Generate random sales data for each slot
-      for (let slot = 1; slot <= 5; slot++) {
-        // Each machine has slightly different sales patterns
-        const baseAmount = Math.floor(Math.random() * 20) + 5;
-        const multiplier = parseInt(id.replace('vm', '')) * 0.5; // Use machine ID to create variation
-        dailyData[`slot${slot}`] = Math.floor(baseAmount * multiplier);
-      }
-
-      data.push(dailyData);
-    });
+    data.push(dailyData);
   });
 
   return data;
