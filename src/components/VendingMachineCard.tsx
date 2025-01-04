@@ -15,7 +15,7 @@ interface VendingMachineCardProps {
   filledSlots?: number[];
   isSelected?: boolean;
   onClick?: () => void;
-  averageSales: number;
+  averageSales?: number;
 }
 
 export function VendingMachineCard({
@@ -95,12 +95,14 @@ export function VendingMachineCard({
               {format(lastSeen, 'dd/MM/yyyy HH:mm:ss')}
             </span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Average Sales</span>
-            <span className="text-sm font-medium">
-              {averageSales} items/day
-            </span>
-          </div>
+          {typeof averageSales === 'number' && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Avg. Daily Sales</span>
+              <span className="text-sm font-medium">
+                {averageSales.toFixed(1)} items
+              </span>
+            </div>
+          )}
         </div>
       </CardContent>
       <VendingMachineSettings

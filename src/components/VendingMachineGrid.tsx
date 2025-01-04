@@ -2,8 +2,6 @@ import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddMachineDialog } from "./AddMachineDialog";
-import { calculateMachineAverageSales } from "@/utils/salesCalculations";
-import { generateSalesData } from "@/utils/salesDataGenerator";
 import {
   Pagination,
   PaginationContent,
@@ -28,34 +26,36 @@ interface VendingMachineGridProps {
   machines: VendingMachine[];
   selectedMachine: string | null;
   onMachineSelect: (id: string) => void;
-  dateRange?: { from: Date; to: Date };
+  salesData: any[];
 }
 
 export function VendingMachineGrid({
   machines,
   selectedMachine,
   onMachineSelect,
-  dateRange,
+  salesData,
 }: VendingMachineGridProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showOffline, setShowOffline] = React.useState(false);
   const [showEmptyStock, setShowEmptyStock] = React.useState(false);
   const itemsPerPage = 6;
 
-  // Generate sales data for the current date range
-  const salesData = React.useMemo(() => {
-    if (!dateRange?.from || !dateRange?.to) return [];
-    return generateSalesData(dateRange.from, dateRange.to);
-  }, [dateRange]);
-
-  // Calculate average sales for each machine
-  const machineAverageSales = React.useMemo(() => {
-    const averages: Record<string, number> = {};
-    machines.forEach(machine => {
-      averages[machine.id] = calculateMachineAverageSales(salesData, machine.id);
-    });
-    return averages;
-  }, [machines, salesData]);
+  const calculateAverageSales = (machineId: string) => {
+    const machineSales = salesData.filter(sale => sale.machineId === machineId);
+    if (!machineSales.length) return 0;
+    
+    const totalSales = machineSales.reduce((acc, day) => {
+      let dailyTotal = 0;
+      for (let i = 1; i <= 5; i++) {
+        if (day[`slot${i}`]) {
+          dailyTotal += day[`slot${i}`];
+        }
+      }
+      return acc + dailyTotal;
+    }, 0);
+    
+    return totalSales / machineSales.length;
+  };
 
   const handleAddMachine = (newMachine: {
     userName: string;
@@ -99,6 +99,14 @@ export function VendingMachineGrid({
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  // Pre-calculate average sales for all machines
+  const machineAverageSales = React.useMemo(() => {
+    return machines.reduce((acc, machine) => {
+      acc[machine.id] = calculateAverageSales(machine.id);
+      return acc;
+    }, {} as Record<string, number>);
+  }, [salesData, machines]);
 
   return (
     <div className="space-y-6">
