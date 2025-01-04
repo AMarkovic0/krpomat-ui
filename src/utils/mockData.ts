@@ -81,30 +81,23 @@ const generateRandomSales = (min: number, max: number) => {
 };
 
 // Generate sales data for a specific machine
-const generateMachineSalesData = (startDate: Date, endDate: Date, machineId: string) => {
+const generateMachineSalesData = (startDate: Date, endDate: Date, machineId: string): any[] => {
   const machine = mockMachines.find(m => m.id === machineId);
   if (!machine) return [];
   
   const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
-  return dateRange.map(date => {
-    const dailyData: Record<string, any> = {
-      date: format(date, 'MMM dd'),
-      machineId,
-    };
-
-    // Generate sales data for each slot
-    for (let slot = 1; slot <= machine.totalSlots; slot++) {
-      // Different machines have different sales patterns
+  return dateRange.map(date => ({
+    date: format(date, 'MMM dd'),
+    machineId,
+    ...Array.from({ length: machine.totalSlots }).reduce((acc, _, idx) => {
       const baseMin = parseInt(machineId.replace('vm', '')) * 2;
       const baseMax = baseMin + 10;
-      dailyData[`slot${slot}`] = generateRandomSales(baseMin, baseMax);
-    }
-
-    return dailyData;
-  });
+      return { ...acc, [`slot${idx + 1}`]: generateRandomSales(baseMin, baseMax) };
+    }, {})
+  }));
 };
 
-export const generateSalesData = (startDate: Date, endDate: Date, selectedMachineId?: string) => {
+export const generateSalesData = (startDate: Date, endDate: Date, selectedMachineId?: string): any[] => {
   if (selectedMachineId) {
     return generateMachineSalesData(startDate, endDate, selectedMachineId);
   }
@@ -114,20 +107,26 @@ export const generateSalesData = (startDate: Date, endDate: Date, selectedMachin
     generateMachineSalesData(startDate, endDate, machine.id)
   );
 
-  // Group by date for the overview chart
-  const groupedByDate = allData.reduce((acc: any[], curr) => {
-    const existingDate = acc.find(item => item.date === curr.date);
-    if (existingDate) {
-      Object.keys(curr).forEach(key => {
+  // Group by date
+  const groupedByDate = Object.values(allData.reduce((acc: Record<string, any>, curr) => {
+    const date = curr.date;
+    if (!acc[date]) {
+      acc[date] = { date, ...Object.keys(curr).reduce((slots, key) => {
         if (key.startsWith('slot')) {
-          existingDate[key] = (existingDate[key] || 0) + curr[key];
+          slots[key] = 0;
         }
-      });
-    } else {
-      acc.push({ ...curr });
+        return slots;
+      }, {}) };
     }
+    
+    Object.keys(curr).forEach(key => {
+      if (key.startsWith('slot')) {
+        acc[date][key] = (acc[date][key] || 0) + curr[key];
+      }
+    });
+    
     return acc;
-  }, []);
+  }, {}));
 
   return groupedByDate;
 };
