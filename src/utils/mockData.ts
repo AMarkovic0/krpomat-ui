@@ -75,23 +75,77 @@ export const mockMachines = [
   },
 ];
 
-export const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) => {
-  const data = [];
-  const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
-  const multiplier = machineId ? parseInt(machineId.replace('vm', '')) : 1;
-  const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
+// Generate random sales between min and max
+const generateRandomSales = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
-  dateRange.forEach(date => {
-    const dailyData: any = {
+// Generate sales data for a specific machine
+const generateMachineSalesData = (startDate: Date, endDate: Date, machineId: string) => {
+  const machine = mockMachines.find(m => m.id === machineId);
+  if (!machine) return [];
+  
+  const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
+  return dateRange.map(date => {
+    const dailyData: Record<string, any> = {
       date: format(date, 'MMM dd'),
+      machineId,
     };
 
-    for (let slot = 1; slot <= 5; slot++) {
-      dailyData[`slot${slot}`] = Math.floor((Math.random() * 20 + 5) * multiplier);
+    // Generate sales data for each slot
+    for (let slot = 1; slot <= machine.totalSlots; slot++) {
+      // Different machines have different sales patterns
+      const baseMin = parseInt(machineId.replace('vm', '')) * 2;
+      const baseMax = baseMin + 10;
+      dailyData[`slot${slot}`] = generateRandomSales(baseMin, baseMax);
     }
 
-    data.push(dailyData);
+    return dailyData;
   });
+};
 
-  return data;
+export const generateSalesData = (startDate: Date, endDate: Date, selectedMachineId?: string) => {
+  if (selectedMachineId) {
+    return generateMachineSalesData(startDate, endDate, selectedMachineId);
+  }
+
+  // Generate data for all machines
+  const allData = mockMachines.flatMap(machine => 
+    generateMachineSalesData(startDate, endDate, machine.id)
+  );
+
+  // Group by date for the overview chart
+  const groupedByDate = allData.reduce((acc: any[], curr) => {
+    const existingDate = acc.find(item => item.date === curr.date);
+    if (existingDate) {
+      Object.keys(curr).forEach(key => {
+        if (key.startsWith('slot')) {
+          existingDate[key] = (existingDate[key] || 0) + curr[key];
+        }
+      });
+    } else {
+      acc.push({ ...curr });
+    }
+    return acc;
+  }, []);
+
+  return groupedByDate;
+};
+
+// Calculate average daily sales for a specific machine
+export const calculateMachineAverageSales = (
+  salesData: any[],
+  machineId: string
+): number => {
+  const machineSales = salesData.filter(data => data.machineId === machineId);
+  if (!machineSales.length) return 0;
+
+  const totalSales = machineSales.reduce((sum, day) => {
+    const slotSales = Object.entries(day)
+      .filter(([key]) => key.startsWith('slot'))
+      .reduce((slotSum, [_, value]) => slotSum + (value as number), 0);
+    return sum + slotSales;
+  }, 0);
+
+  return Number((totalSales / machineSales.length).toFixed(1));
 };

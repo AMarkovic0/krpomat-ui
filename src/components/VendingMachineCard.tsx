@@ -12,9 +12,10 @@ interface VendingMachineCardProps {
   lastSeen: Date;
   stockLevel: number;
   totalSlots: number;
-  filledSlots?: number[];  // New prop to track which slots are filled
+  filledSlots?: number[];
   isSelected?: boolean;
   onClick?: () => void;
+  averageSales: number;
 }
 
 export function VendingMachineCard({
@@ -25,9 +26,10 @@ export function VendingMachineCard({
   lastSeen,
   stockLevel: initialStockLevel,
   totalSlots: initialTotalSlots,
-  filledSlots = [0, 2, 4], // Example default value showing slots 1, 3, and 5 are filled
+  filledSlots = [0, 2, 4],
   isSelected,
   onClick,
+  averageSales,
 }: VendingMachineCardProps) {
   const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
   const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
@@ -91,6 +93,12 @@ export function VendingMachineCard({
             <span className="text-sm text-muted-foreground">Last Seen</span>
             <span className="text-sm font-medium">
               {format(lastSeen, 'dd/MM/yyyy HH:mm:ss')}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Average Sales</span>
+            <span className="text-sm font-medium">
+              {averageSales} items/day
             </span>
           </div>
         </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddMachineDialog } from "./AddMachineDialog";
+import { calculateMachineAverageSales, generateSalesData } from "@/utils/mockData";
 import {
   Pagination,
   PaginationContent,
@@ -26,17 +27,34 @@ interface VendingMachineGridProps {
   machines: VendingMachine[];
   selectedMachine: string | null;
   onMachineSelect: (id: string) => void;
+  dateRange?: { from: Date; to: Date };
 }
 
 export function VendingMachineGrid({
   machines,
   selectedMachine,
   onMachineSelect,
+  dateRange,
 }: VendingMachineGridProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showOffline, setShowOffline] = React.useState(false);
   const [showEmptyStock, setShowEmptyStock] = React.useState(false);
   const itemsPerPage = 6;
+
+  // Generate sales data for the current date range
+  const salesData = React.useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return [];
+    return generateSalesData(dateRange.from, dateRange.to);
+  }, [dateRange]);
+
+  // Calculate average sales for each machine
+  const machineAverageSales = React.useMemo(() => {
+    const averages: Record<string, number> = {};
+    machines.forEach(machine => {
+      averages[machine.id] = calculateMachineAverageSales(salesData, machine.id);
+    });
+    return averages;
+  }, [machines, salesData]);
 
   const handleAddMachine = (newMachine: {
     userName: string;
@@ -48,10 +66,10 @@ export function VendingMachineGrid({
     const machine: VendingMachine = {
       id: newMachine.id,
       name: newMachine.name,
-      location: "New Location", // Default value
-      isOnline: true, // Default value
+      location: "New Location",
+      isOnline: true,
       lastSeen: new Date(),
-      stockLevel: 0, // Default value
+      stockLevel: 0,
       totalSlots: newMachine.totalSlots,
     };
     
@@ -63,11 +81,9 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      // Show online machines that have any empty slots
       return machine.isOnline && machine.stockLevel < machine.totalSlots;
     }
     if (showOffline && showEmptyStock) {
-      // Show offline machines OR online machines with any empty slots
       return !machine.isOnline || (machine.isOnline && machine.stockLevel < machine.totalSlots);
     }
     return true;
@@ -127,6 +143,7 @@ export function VendingMachineGrid({
               {...machine}
               isSelected={machine.id === selectedMachine}
               onClick={() => onMachineSelect(machine.id)}
+              averageSales={machineAverageSales[machine.id]}
             />
           ))}
         </div>
