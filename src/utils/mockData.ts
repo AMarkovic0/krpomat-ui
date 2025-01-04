@@ -151,10 +151,10 @@ export const calculateMachineAverageSales = (
   if (!machineSales.length) return 0;
 
   const totalSales = machineSales.reduce((sum, day) => {
-    const slotSales = Object.entries(day)
+    const dailyTotal = Object.entries(day)
       .filter(([key]) => key.startsWith('slot'))
       .reduce((slotSum, [_, value]) => slotSum + (value as number), 0);
-    return sum + slotSales;
+    return sum + dailyTotal;
   }, 0);
 
   return Number((totalSales / machineSales.length).toFixed(1));
