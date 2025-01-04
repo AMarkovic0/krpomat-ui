@@ -41,9 +41,6 @@ export function VendingMachineGrid({
   const itemsPerPage = 6;
 
   const calculateAverageSales = (machineId: string) => {
-    if (!salesData.length) return 0;
-    
-    // Filter sales data for this specific machine
     const machineSales = salesData.filter(sale => sale.machineId === machineId);
     if (!machineSales.length) return 0;
     
@@ -103,6 +100,14 @@ export function VendingMachineGrid({
     setCurrentPage(page);
   };
 
+  // Pre-calculate average sales for all machines
+  const machineAverageSales = React.useMemo(() => {
+    return machines.reduce((acc, machine) => {
+      acc[machine.id] = calculateAverageSales(machine.id);
+      return acc;
+    }, {} as Record<string, number>);
+  }, [salesData, machines]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-6 mb-4">
@@ -147,7 +152,7 @@ export function VendingMachineGrid({
               {...machine}
               isSelected={machine.id === selectedMachine}
               onClick={() => onMachineSelect(machine.id)}
-              averageSales={calculateAverageSales(machine.id)}
+              averageSales={machineAverageSales[machine.id]}
             />
           ))}
         </div>
