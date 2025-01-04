@@ -6,7 +6,8 @@ import { VendingMachineGrid } from "@/components/VendingMachineGrid";
 import { SalesOverviewChart } from "@/components/SalesOverviewChart";
 import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
-import { mockMachines, generateSalesData } from "@/utils/mockData";
+import { mockMachines } from "@/utils/mockData";
+import { generateSalesData } from "@/utils/salesDataGenerator";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");

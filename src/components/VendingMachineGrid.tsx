@@ -2,7 +2,8 @@ import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddMachineDialog } from "./AddMachineDialog";
-import { calculateMachineAverageSales, generateSalesData } from "@/utils/mockData";
+import { calculateMachineAverageSales } from "@/utils/salesCalculations";
+import { generateSalesData } from "@/utils/salesDataGenerator";
 import {
   Pagination,
   PaginationContent,
