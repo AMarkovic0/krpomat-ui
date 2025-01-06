@@ -18,6 +18,7 @@ interface AddMachineDialogProps {
     id: string;
     totalSlots: number;
     phone: string;
+    companyName: string;
   }) => void;
 }
 
@@ -28,6 +29,7 @@ export function AddMachineDialog({ onConfirm }: AddMachineDialogProps) {
   const [machineId, setMachineId] = useState("");
   const [slots, setSlots] = useState("");
   const [phone, setPhone] = useState("");
+  const [companyName, setCompanyName] = useState("");
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^\d+\-() ]/g, '');
@@ -48,6 +50,7 @@ export function AddMachineDialog({ onConfirm }: AddMachineDialogProps) {
       id: machineId,
       totalSlots: parseInt(slots),
       phone,
+      companyName,
     });
     setOpen(false);
     // Reset form
@@ -56,6 +59,7 @@ export function AddMachineDialog({ onConfirm }: AddMachineDialogProps) {
     setMachineId("");
     setSlots("");
     setPhone("");
+    setCompanyName("");
   };
 
   return (
@@ -92,6 +96,17 @@ export function AddMachineDialog({ onConfirm }: AddMachineDialogProps) {
               id="machineName"
               value={machineName}
               onChange={(e) => setMachineName(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="companyName" className="text-right">
+              Company Name
+            </label>
+            <Input
+              id="companyName"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
               className="col-span-3"
             />
           </div>

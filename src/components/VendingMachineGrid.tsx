@@ -36,6 +36,7 @@ export function VendingMachineGrid({
     id: string;
     totalSlots: number;
     phone: string;
+    companyName: string;
   }) => {
     const machine: VendingMachine = {
       id: newMachine.id,
@@ -45,7 +46,7 @@ export function VendingMachineGrid({
       lastSeen: new Date(),
       stockLevel: 0,
       totalSlots: newMachine.totalSlots,
-      companyName: "New Company",
+      companyName: newMachine.companyName,
     };
     
     console.log("New machine created:", machine);

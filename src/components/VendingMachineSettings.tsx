@@ -16,6 +16,7 @@ interface VendingMachineSettingsProps {
   initialName: string;
   initialPhone?: string;
   initialSlots: number;
+  initialCompanyName: string;
   onSave?: (newSlots: number) => void;
 }
 
@@ -24,11 +25,13 @@ export function VendingMachineSettings({
   initialName,
   initialPhone = "",
   initialSlots,
+  initialCompanyName,
   onSave,
 }: VendingMachineSettingsProps) {
   const [name, setName] = useState(initialName);
   const [phone, setPhone] = useState(initialPhone);
   const [slots, setSlots] = useState(initialSlots.toString());
+  const [companyName, setCompanyName] = useState(initialCompanyName);
   const [open, setOpen] = useState(false);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +52,7 @@ export function VendingMachineSettings({
       name,
       phone,
       slots: parseInt(slots),
+      companyName,
     });
     onSave?.(parseInt(slots));
     setOpen(false);
@@ -85,6 +89,17 @@ export function VendingMachineSettings({
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="companyName" className="text-right">
+              Company
+            </label>
+            <Input
+              id="companyName"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
               className="col-span-3"
             />
           </div>

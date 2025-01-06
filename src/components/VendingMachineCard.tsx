@@ -105,6 +105,7 @@ export function VendingMachineCard({
         id={id}
         initialName={name}
         initialSlots={totalSlots}
+        initialCompanyName={companyName}
         onSave={handleSettingsUpdate}
       />
     </Card>
