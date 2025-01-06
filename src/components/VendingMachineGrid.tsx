@@ -1,16 +1,7 @@
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AddMachineDialog } from "./AddMachineDialog";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { VendingMachineFilters } from "./VendingMachineFilters";
+import { VendingMachinePagination } from "./VendingMachinePagination";
 
 interface VendingMachine {
   id: string;
@@ -49,12 +40,12 @@ export function VendingMachineGrid({
     const machine: VendingMachine = {
       id: newMachine.id,
       name: newMachine.name,
-      location: "New Location", // Default value
-      isOnline: true, // Default value
+      location: "New Location",
+      isOnline: true,
       lastSeen: new Date(),
-      stockLevel: 0, // Default value
+      stockLevel: 0,
       totalSlots: newMachine.totalSlots,
-      companyName: "New Company", // Default value
+      companyName: "New Company",
     };
     
     console.log("New machine created:", machine);
@@ -65,11 +56,9 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      // Show online machines that have any empty slots
       return machine.isOnline && machine.stockLevel < machine.totalSlots;
     }
     if (showOffline && showEmptyStock) {
-      // Show offline machines OR online machines with any empty slots
       return !machine.isOnline || (machine.isOnline && machine.stockLevel < machine.totalSlots);
     }
     return true;
@@ -81,45 +70,15 @@ export function VendingMachineGrid({
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-6 mb-4">
-        <AddMachineDialog onConfirm={handleAddMachine} />
-        
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="offline"
-              checked={showOffline}
-              onCheckedChange={(checked) => setShowOffline(checked as boolean)}
-            />
-            <label
-              htmlFor="offline"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Show Offline
-            </label>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="empty"
-              checked={showEmptyStock}
-              onCheckedChange={(checked) => setShowEmptyStock(checked as boolean)}
-            />
-            <label
-              htmlFor="empty"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Show Empty Stock
-            </label>
-          </div>
-        </div>
-      </div>
+      <VendingMachineFilters
+        showOffline={showOffline}
+        showEmptyStock={showEmptyStock}
+        onOfflineChange={setShowOffline}
+        onEmptyStockChange={setShowEmptyStock}
+        onAddMachine={handleAddMachine}
+      />
 
       <div className="relative border border-gray-200 rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -134,35 +93,11 @@ export function VendingMachineGrid({
         </div>
       </div>
 
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-          
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <PaginationItem key={page}>
-              <PaginationLink
-                onClick={() => handlePageChange(page)}
-                isActive={currentPage === page}
-                className="cursor-pointer"
-              >
-                {page}
-              </PaginationLink>
-            </PaginationItem>
-          ))}
-
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <VendingMachinePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
