@@ -20,6 +20,7 @@ interface VendingMachine {
   lastSeen: Date;
   stockLevel: number;
   totalSlots: number;
+  companyName: string;
 }
 
 interface VendingMachineGridProps {
@@ -53,6 +54,7 @@ export function VendingMachineGrid({
       lastSeen: new Date(),
       stockLevel: 0, // Default value
       totalSlots: newMachine.totalSlots,
+      companyName: "New Company", // Default value
     };
     
     console.log("New machine created:", machine);
