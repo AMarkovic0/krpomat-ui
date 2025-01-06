@@ -65,8 +65,9 @@ export function VendingMachineCard({
               {isOnline ? "Online" : "Offline"}
             </span>
           </div>
-          <div className="text-sm text-muted-foreground">
-            Company: <span className="font-medium">{companyName}</span>
+          <div className="text-sm text-muted-foreground flex justify-between items-center">
+            <span>Company:</span>
+            <span className="font-medium">{companyName}</span>
           </div>
         </div>
       </CardHeader>
