@@ -53,7 +53,6 @@ export function VendingMachineCard({
       <CardHeader className="pb-2">
         <div className="flex flex-col space-y-2">
           <CardTitle className="text-lg font-bold">{name}</CardTitle>
-          <div className="text-sm text-muted-foreground">{companyName}</div>
           <div className="flex items-center space-x-2">
             <div
               className={cn(
@@ -65,6 +64,9 @@ export function VendingMachineCard({
             <span className="text-sm text-muted-foreground">
               {isOnline ? "Online" : "Offline"}
             </span>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Company: <span className="font-medium">{companyName}</span>
           </div>
         </div>
       </CardHeader>
