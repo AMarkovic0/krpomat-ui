@@ -1,5 +1,16 @@
 import { format, eachDayOfInterval } from "date-fns";
 
+const companyNames = [
+  "VendTech Solutions",
+  "SnackMaster Corp",
+  "RefreshMent Inc",
+  "VendingPro Services",
+  "AutoSnacks Ltd",
+  "QuickBite Vending",
+  "FreshVend Solutions",
+  "SnackExpress Co",
+];
+
 export const mockMachines = [
   {
     id: "vm1",
@@ -9,6 +20,7 @@ export const mockMachines = [
     lastSeen: new Date(),
     stockLevel: 2,
     totalSlots: 4,
+    companyName: companyNames[0],
   },
   {
     id: "vm2",
@@ -18,6 +30,7 @@ export const mockMachines = [
     lastSeen: new Date(Date.now() - 86400000), // 1 day ago
     stockLevel: 1,
     totalSlots: 5,
+    companyName: companyNames[1],
   },
   {
     id: "vm3",
@@ -27,6 +40,7 @@ export const mockMachines = [
     lastSeen: new Date(),
     stockLevel: 5,
     totalSlots: 5,
+    companyName: companyNames[2],
   },
   {
     id: "vm4",
@@ -36,6 +50,7 @@ export const mockMachines = [
     lastSeen: new Date(),
     stockLevel: 1,
     totalSlots: 1,
+    companyName: companyNames[3],
   },
   {
     id: "vm5",
@@ -45,6 +60,7 @@ export const mockMachines = [
     lastSeen: new Date(),
     stockLevel: 0,
     totalSlots: 1,
+    companyName: companyNames[4],
   },
   {
     id: "vm6",
@@ -54,6 +70,7 @@ export const mockMachines = [
     lastSeen: new Date(Date.now() - 86400000), // 1 day ago
     stockLevel: 0,
     totalSlots: 2,
+    companyName: companyNames[5],
   },
   {
     id: "vm7",
@@ -63,6 +80,7 @@ export const mockMachines = [
     lastSeen: new Date(),
     stockLevel: 3,
     totalSlots: 3,
+    companyName: companyNames[6],
   },
   {
     id: "vm8",
@@ -72,6 +90,7 @@ export const mockMachines = [
     lastSeen: new Date(),
     stockLevel: 4,
     totalSlots: 5,
+    companyName: companyNames[7],
   },
 ];
 
