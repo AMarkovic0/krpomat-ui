@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { login as login_api } from "../api";
+import { TOKEN } from '../utils';
 
 type User = {
   id: string;
@@ -24,19 +26,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = useCallback(async (email: string, password: string) => {
-    const mockUser = mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+    let resp = await login_api(email, password)
+      .then((data) => {
+        if (typeof data === 'undefined') {
+          localStorage.setItem("isAuth", false);
+          setUser(null);
+          throw new Error("Invalid credentials");
+          return;
+        }
 
-    if (mockUser) {
-      const { password: _, ...userWithoutPassword } = mockUser;
-      setUser(userWithoutPassword);
-    } else {
-      throw new Error("Invalid credentials");
-    }
+        localStorage.setItem("isAuth", true);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem(TOKEN(), data.token);
+        setUser({
+          email : data.username,
+          role: (data.username === "admin" ? "admin" : "user") as const
+        });
+      });
   }, []);
 
   const logout = useCallback(() => {
+    localStorage.setItem("isAuth", false);
+    localStorage.setItem(TOKEN(), "");
     setUser(null);
   }, []);
 

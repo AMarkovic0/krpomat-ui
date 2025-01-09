@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 
+import { login } from "../api";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +35,7 @@ const Login = () => {
           <h1 className="text-3xl font-bold">Login</h1>
           <p className="text-gray-500">Enter your credentials to continue</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
@@ -41,13 +43,13 @@ const Login = () => {
             </label>
             <Input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
               Password
@@ -60,7 +62,7 @@ const Login = () => {
               required
             />
           </div>
-          
+
           <Button type="submit" className="w-full">
             Login
           </Button>
