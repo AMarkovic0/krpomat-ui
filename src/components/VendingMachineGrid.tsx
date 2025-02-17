@@ -3,6 +3,9 @@ import { VendingMachineCard } from "./VendingMachineCard";
 import { VendingMachineFilters } from "./VendingMachineFilters";
 import { VendingMachinePagination } from "./VendingMachinePagination";
 
+import { addMachine, getUsers } from './../api';
+import { refreshPage } from './../utils';
+
 interface VendingMachine {
   id: string;
   name: string;
@@ -38,18 +41,15 @@ export function VendingMachineGrid({
     phone: string;
     companyName: string;
   }) => {
-    const machine: VendingMachine = {
-      id: newMachine.id,
-      name: newMachine.name,
-      location: "New Location",
-      isOnline: true,
-      lastSeen: new Date(),
-      stockLevel: 0,
-      totalSlots: newMachine.totalSlots,
-      companyName: newMachine.companyName,
-    };
-    
-    console.log("New machine created:", machine);
+    addMachine(
+      newMachine.id,
+      newMachine.name,
+      newMachine.userName,
+      newMachine.totalSlots,
+      newMachine.phone
+    ).then((err) => {
+      refreshPage();
+    });
   };
 
   const filteredMachines = machines.filter((machine) => {
@@ -57,10 +57,13 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      return machine.isOnline && machine.stockLevel < machine.totalSlots;
+      return machine.isOnline && machine.totalSlots < machine.stockLevel.reduce((a, b) => a + b, 0);
     }
     if (showOffline && showEmptyStock) {
-      return !machine.isOnline || (machine.isOnline && machine.stockLevel < machine.totalSlots);
+      return !machine.isOnline || (
+        machine.isOnline &&
+        (machine.totalSlots < machine.stockLevel.reduce((a, b) => a + b, 0))
+      );
     }
     return true;
   });

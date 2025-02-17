@@ -6,7 +6,10 @@ import { VendingMachineGrid } from "@/components/VendingMachineGrid";
 import { SalesOverviewChart } from "@/components/SalesOverviewChart";
 import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
-import { mockMachines, generateSalesData } from "@/utils/mockData";
+import { generateSalesData } from "@/utils/mockData";
+import { DateTime } from "luxon";
+
+import { getMachines } from "../api";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,11 +22,52 @@ const Index = () => {
     generateSalesData(subDays(new Date(), 6), new Date())
   );
 
-  const filteredMachines = mockMachines.filter(
-    (machine) =>
-      machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      machine.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  let machines = [];
+  const [filteredMachines, setMachines] = useState([]);
+
+  const repackMachines = (machine, index) => {
+    machines[index] = {
+      id: machine.machine_id,
+      name: machine.machine_name,
+      location: machine.machine_name,
+      isOnline: true,
+      lastSeen: Date.parse(machine.online_status_changed),
+      lastSeen: DateTime.fromFormat(
+        machine.online_status_changed,
+        "dd.MM.yyyy HH:mm:ss"
+      ).toJSDate(),
+      stockLevel: [machine.p1],
+      totalSlots: machine.num_of_prod,
+      companyName: machine.username,
+      phoneNumber: machine.phone_number,
+    };
+  }
+
+  if (filteredMachines.length === 0) {
+      getMachines().then((data) => {
+        data.forEach(repackMachines);
+
+        const tmpFilteredMachines = machines.filter(
+          (machine) =>
+            machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            machine.location.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        setMachines(tmpFilteredMachines);
+      });
+  }
+
+  const searchQueryChangeHandler = (query) => {
+    setSearchQuery(query);
+
+    const tmpFilteredMachines = machines.filter(
+      (machine) =>
+        machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        machine.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    setMachines(tmpFilteredMachines);
+  };
 
   const handleDateSelect = (newDate: DateRange | undefined) => {
     setDate(newDate);
@@ -58,10 +102,10 @@ const Index = () => {
         </div>
 
         <div className="flex flex-col order-1 lg:order-2 min-h-[300px]">
-          <SalesOverviewChart 
+          <SalesOverviewChart
             salesData={salesData}
             selectedMachine={selectedMachine}
-            machines={mockMachines}
+            machines={filteredMachines}
           />
         </div>
       </div>
@@ -69,13 +113,13 @@ const Index = () => {
       <div className="mb-6">
         <OnlineStateTimeline
           selectedMachine={selectedMachine}
-          machines={mockMachines}
+          machines={machines}
           dateRange={date}
         />
       </div>
 
       <div className="w-full mb-6">
-        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        <SearchBar value={searchQuery} onChange={searchQueryChangeHandler} />
       </div>
 
       <VendingMachineGrid
