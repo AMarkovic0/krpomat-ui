@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Settings } from "lucide-react";
+import { Settings, Trash2 } from "lucide-react";
+import { deleteMachine } from "../api";
+import { refreshPage } from "../utils";
 
 interface VendingMachineSettingsProps {
   id: string;
@@ -58,6 +61,14 @@ export function VendingMachineSettings({
     setOpen(false);
   };
 
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this machine?")) {
+      await deleteMachine(id);
+      setOpen(false);
+      refreshPage();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -75,7 +86,17 @@ export function VendingMachineSettings({
         onClick={(e) => e.stopPropagation()}
       >
         <DialogHeader>
-          <DialogTitle>Machine Settings</DialogTitle>
+          <div className="flex justify-between items-center">
+            <DialogTitle>Machine Settings</DialogTitle>
+            <Button 
+              variant="destructive" 
+              size="icon"
+              onClick={handleDelete}
+              className="h-8 w-8"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
           <DialogDescription>
             Configure the vending machine settings. Click save when you're done.
           </DialogDescription>
