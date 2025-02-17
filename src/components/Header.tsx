@@ -9,6 +9,7 @@ export const Header = () => {
   const location = useLocation();
 
   const handleLogout = () => {
+    localStorage.setItem("isAuth", "false");
     logout();
     navigate("/login");
   };
@@ -38,12 +39,12 @@ export const Header = () => {
               </Button>
             )}
           </nav>
-          
+
           <div className="flex items-center gap-4">
-            {user ? (
+            {(localStorage.getItem("isAuth") === "true") ? (
               <>
                 <span className="text-sm text-muted-foreground">
-                  {user.email}
+                  {localStorage.getItem("username")}
                 </span>
                 <Button
                   variant="outline"

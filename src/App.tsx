@@ -11,19 +11,21 @@ import Login from "./pages/Login";
 import Users from "./pages/Users";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
+  if (localStorage.getItem("isAuth") !== "true") return <Navigate to="/login" />;
   return <>{children}</>;
 };
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  if (!isAdmin) return <Navigate to="/" />;
+  if (localStorage.getItem("isAuth") !== "true") return <Navigate to="/login" />;
   return <>{children}</>;
 };
 
 const AppRoutes = () => {
+  const getAuth = () => {
+    const isAuth = localStorage.getItem("isAuth");
+    return isAuth === 'true';
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
