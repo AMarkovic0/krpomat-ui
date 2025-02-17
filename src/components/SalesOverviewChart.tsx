@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import dayjs, { Dayjs } from 'dayjs';
+
+import { getSales } from './../api';
 
 interface SalesOverviewChartProps {
   salesData: any[];
@@ -14,15 +18,52 @@ interface SalesOverviewChartProps {
 
 const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
+function getToday() {
+  const today = new Date();
+
+  const month = today.getMonth() + 1;
+  const year = today.getFullYear();
+  const date = today.getDate();
+
+  return `${date}.${month}.${year}.`;
+}
+
+function getDefaultStartDate() {
+  const today = new Date();
+
+  let month = today.getMonth();
+  let year = today.getFullYear();
+  const date = today.getDate();
+
+  if (month == 0) {
+    month = 12;
+    year = year - 1;
+  }
+
+  return `${date}.${month}.${year}.`;
+}
+
+
 export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: SalesOverviewChartProps) => {
+  const [salesDataForSelected, setSalesDataForSelected] = useState([]);
   const selectedMachineData = selectedMachine ? machines.find(m => m.id === selectedMachine) : null;
-  const numSlots = selectedMachineData?.totalSlots || 5;
+  const numSlots = selectedMachineData?.totalSlots || 1;
+
+  if (salesDataForSelected.length === 0) {
+    getSales({
+      start_date : getDefaultStartDate(),
+      end_date : getToday(),
+      machine_id : selectedMachine
+    }).then((data) => {setSalesDataForSelected(data)});
+  }
+
+  console.log(salesData);
 
   return (
     <Card className="min-w-[300px]">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg">
-          {selectedMachine
+          {selectedMachineData
             ? `Sales Overview - ${machines.find(m => m.id === selectedMachine)?.name}`
             : 'Sales Overview - All Machines'}
         </CardTitle>
