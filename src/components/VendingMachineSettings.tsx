@@ -86,17 +86,7 @@ export function VendingMachineSettings({
         onClick={(e) => e.stopPropagation()}
       >
         <DialogHeader>
-          <div className="flex justify-between items-center">
-            <DialogTitle>Machine Settings</DialogTitle>
-            <Button 
-              variant="destructive" 
-              size="icon"
-              onClick={handleDelete}
-              className="h-8 w-8"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle>Machine Settings</DialogTitle>
           <DialogDescription>
             Configure the vending machine settings. Click save when you're done.
           </DialogDescription>
@@ -152,7 +142,15 @@ export function VendingMachineSettings({
             />
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end space-x-2">
+          <Button 
+            variant="destructive" 
+            onClick={handleDelete}
+            className="flex items-center"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
           <Button onClick={handleSave}>Save changes</Button>
         </div>
       </DialogContent>
