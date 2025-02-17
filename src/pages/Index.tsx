@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { DateRange } from "react-day-picker";
@@ -22,21 +23,20 @@ const Index = () => {
     generateSalesData(subDays(new Date(), 6), new Date())
   );
 
-  let machines = [];
+  const machines = [];
   const [filteredMachines, setMachines] = useState([]);
 
-  const repackMachines = (machine, index) => {
+  const repackMachines = (machine: any, index: number) => {
     machines[index] = {
       id: machine.machine_id,
       name: machine.machine_name,
       location: machine.machine_name,
       isOnline: true,
-      lastSeen: Date.parse(machine.online_status_changed),
       lastSeen: DateTime.fromFormat(
         machine.online_status_changed,
         "dd.MM.yyyy HH:mm:ss"
       ).toJSDate(),
-      stockLevel: [machine.p1],
+      stockLevel: machine.p1,
       totalSlots: machine.num_of_prod,
       companyName: machine.username,
       phoneNumber: machine.phone_number,
@@ -44,20 +44,20 @@ const Index = () => {
   }
 
   if (filteredMachines.length === 0) {
-      getMachines().then((data) => {
-        data.forEach(repackMachines);
+    getMachines().then((data) => {
+      data.forEach(repackMachines);
 
-        const tmpFilteredMachines = machines.filter(
-          (machine) =>
-            machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            machine.location.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+      const tmpFilteredMachines = machines.filter(
+        (machine) =>
+          machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          machine.location.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
-        setMachines(tmpFilteredMachines);
-      });
+      setMachines(tmpFilteredMachines);
+    });
   }
 
-  const searchQueryChangeHandler = (query) => {
+  const searchQueryChangeHandler = (query: string) => {
     setSearchQuery(query);
 
     const tmpFilteredMachines = machines.filter(

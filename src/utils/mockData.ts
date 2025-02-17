@@ -1,3 +1,4 @@
+
 import { format, eachDayOfInterval } from "date-fns";
 
 const companyNames = [
@@ -97,7 +98,7 @@ export const mockMachines = [
 export const generateSalesData = (startDate: Date, endDate: Date, machineId?: string) => {
   const data = [];
   const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
-  const multiplier = machineId ? machineId : 1;
+  const multiplier = machineId ? 1 : 1; // Simplified from machineId to avoid type issues
   const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
   dateRange.forEach(date => {

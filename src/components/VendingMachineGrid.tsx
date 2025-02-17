@@ -1,3 +1,4 @@
+
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { VendingMachineFilters } from "./VendingMachineFilters";
@@ -57,13 +58,10 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      return machine.isOnline && machine.totalSlots < machine.stockLevel.reduce((a, b) => a + b, 0);
+      return machine.isOnline && machine.stockLevel === 0;
     }
     if (showOffline && showEmptyStock) {
-      return !machine.isOnline || (
-        machine.isOnline &&
-        (machine.totalSlots < machine.stockLevel.reduce((a, b) => a + b, 0))
-      );
+      return !machine.isOnline || (machine.isOnline && machine.stockLevel === 0);
     }
     return true;
   });

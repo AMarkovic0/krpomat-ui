@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import dayjs, { Dayjs } from 'dayjs';
+import { format } from "date-fns"; // Changed from dayjs to date-fns since it's already in use
 
 import { getSales } from './../api';
 
@@ -20,17 +21,14 @@ const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
 function getToday() {
   const today = new Date();
-
   const month = today.getMonth() + 1;
   const year = today.getFullYear();
   const date = today.getDate();
-
   return `${date}.${month}.${year}.`;
 }
 
 function getDefaultStartDate() {
   const today = new Date();
-
   let month = today.getMonth();
   let year = today.getFullYear();
   const date = today.getDate();
@@ -43,7 +41,6 @@ function getDefaultStartDate() {
   return `${date}.${month}.${year}.`;
 }
 
-
 export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: SalesOverviewChartProps) => {
   const [salesDataForSelected, setSalesDataForSelected] = useState([]);
   const selectedMachineData = selectedMachine ? machines.find(m => m.id === selectedMachine) : null;
@@ -51,20 +48,18 @@ export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: Sal
 
   if (salesDataForSelected.length === 0) {
     getSales({
-      start_date : getDefaultStartDate(),
-      end_date : getToday(),
-      machine_id : selectedMachine
-    }).then((data) => {setSalesDataForSelected(data)});
+      start_date: getDefaultStartDate(),
+      end_date: getToday(),
+      machine_id: selectedMachine
+    }).then((data) => { setSalesDataForSelected(data) });
   }
-
-  console.log(salesData);
 
   return (
     <Card className="min-w-[300px]">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg">
           {selectedMachineData
-            ? `Sales Overview - ${machines.find(m => m.id === selectedMachine)?.name}`
+            ? `Sales Overview - ${selectedMachineData.name}`
             : 'Sales Overview - All Machines'}
         </CardTitle>
       </CardHeader>
