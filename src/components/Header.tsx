@@ -27,7 +27,7 @@ export const Header = () => {
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
             </Button>
-            
+
             {isAdmin && (
               <Button
                 variant={location.pathname === "/users" ? "default" : "ghost"}
