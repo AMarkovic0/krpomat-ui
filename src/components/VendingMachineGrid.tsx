@@ -54,14 +54,11 @@ export function VendingMachineGrid({
   };
 
   const filteredMachines = machines.filter((machine) => {
-    if (showOffline && !showEmptyStock) {
+    if (showOffline) {
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
       return machine.isOnline && machine.stockLevel === 0;
-    }
-    if (showOffline && showEmptyStock) {
-      return !machine.isOnline || (machine.isOnline && machine.stockLevel === 0);
     }
     return true;
   });
