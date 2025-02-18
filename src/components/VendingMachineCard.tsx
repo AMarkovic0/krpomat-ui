@@ -16,6 +16,7 @@ interface VendingMachineCardProps {
   isSelected?: boolean;
   onClick?: () => void;
   companyName: string;
+  phoneNumber: string;
 }
 
 export function VendingMachineCard({
@@ -30,6 +31,7 @@ export function VendingMachineCard({
   isSelected,
   onClick,
   companyName,
+  phoneNumber,
 }: VendingMachineCardProps) {
   const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
   const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
@@ -114,6 +116,7 @@ export function VendingMachineCard({
         initialName={name}
         initialSlots={totalSlots}
         initialCompanyName={companyName}
+        initialPhone={phoneNumber}
         onSave={handleSettingsUpdate}
       />
     </Card>
