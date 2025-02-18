@@ -42,6 +42,14 @@ export function VendingMachineCard({
     setStockLevel(Math.min(stockLevel, newSlots));
   };
 
+  const getLastSeenString = (date) => {
+    let lastSeenTime = lastSeen.getTime();
+    let defaultTime = new Date("01.01.1970 00:00:00").getTime();
+    return (lastSeenTime === defaultTime) ?
+      "Waiting for data..." :
+      format(lastSeen, 'dd/MM/yyyy HH:mm:ss');
+  }
+
   return (
     <Card
       className={cn(
@@ -96,7 +104,7 @@ export function VendingMachineCard({
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Last Seen</span>
             <span className="text-sm font-medium">
-              {format(lastSeen, 'dd/MM/yyyy HH:mm:ss')}
+              {getLastSeenString(lastSeen)}
             </span>
           </div>
         </div>

@@ -12,6 +12,8 @@ import { DateTime } from "luxon";
 
 import { getMachines } from "../api";
 
+const MIN10_IN_MS = 60 * 1000 * 10;
+
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [date, setDate] = useState<DateRange | undefined>({
@@ -33,6 +35,10 @@ const Index = () => {
       location: machine.machine_name,
       isOnline: true,
       lastSeen: DateTime.fromFormat(
+        machine.sale_date,
+        "dd.MM.yyyy HH:mm:ss"
+      ).toJSDate(),
+      onlineStatusChanged: DateTime.fromFormat(
         machine.online_status_changed,
         "dd.MM.yyyy HH:mm:ss"
       ).toJSDate(),
@@ -41,6 +47,9 @@ const Index = () => {
       companyName: machine.username,
       phoneNumber: machine.phone_number,
     };
+
+    let lastSeenTimeOffset = machines[index].lastSeen.getTime() + MIN10_IN_MS;
+    machines[index].isOnline = new Date(lastSeenTimeOffset) > new Date();
   }
 
   if (filteredMachines.length === 0) {
