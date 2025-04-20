@@ -16,6 +16,7 @@ interface VendingMachine {
   stockLevel: number;
   totalSlots: number;
   companyName: string;
+  phoneNumber?: string; // Added phoneNumber property to the interface
 }
 
 interface VendingMachineGridProps {
@@ -97,6 +98,7 @@ export function VendingMachineGrid({
             <VendingMachineCard
               key={machine.id}
               {...machine}
+              phoneNumber={machine.phoneNumber || ""} // Add phoneNumber property with a default empty string
               isSelected={machine.id === selectedMachine}
               onClick={() => onMachineSelect(machine.id)}
             />
