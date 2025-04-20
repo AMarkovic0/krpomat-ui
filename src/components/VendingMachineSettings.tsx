@@ -12,7 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Settings, Trash2 } from "lucide-react";
 import { deleteMachine } from "../api";
-import { refreshPage } from "../utils";
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 interface VendingMachineSettingsProps {
   id: string;
@@ -36,6 +37,8 @@ export function VendingMachineSettings({
   const [slots, setSlots] = useState(initialSlots.toString());
   const [companyName, setCompanyName] = useState(initialCompanyName);
   const [open, setOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow numbers and basic phone number characters
@@ -63,9 +66,26 @@ export function VendingMachineSettings({
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this machine?")) {
-      await deleteMachine(id);
-      setOpen(false);
-      refreshPage();
+      setIsDeleting(true);
+      try {
+        await deleteMachine(id);
+        setOpen(false);
+        toast({
+          title: "Success",
+          description: "Machine deleted successfully",
+        });
+        // Use React Router to navigate to the same page (refresh)
+        navigate(0);
+      } catch (error) {
+        console.error("Error deleting machine:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to delete machine",
+        });
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -146,6 +166,7 @@ export function VendingMachineSettings({
           <Button 
             variant="destructive" 
             onClick={handleDelete}
+            disabled={isDeleting}
             className="flex items-center"
           >
             <Trash2 className="h-4 w-4 mr-2" />

@@ -1,23 +1,10 @@
+
 import * as React from 'react';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 
-//export function Copyright() {
-//  return (
-//    <Typography variant="body2" color="text.secondary">
-//      {'Copyright © '}
-//      <Link color="inherit" href="https://app.krpomat.rs/">
-//        KRPOMAT RS
-//      </Link>{' '}
-//      {new Date().getFullYear()}
-//      {'.'}
-//    </Typography>
-//  );
-//}
-
-export function refreshPage() {
-  window.location.reload();
-}
+// We'll remove the refreshPage function as it's causing security issues
+// and replace it with a better approach using React Router
 
 export function TOKEN() { return "booolassw"; };
 

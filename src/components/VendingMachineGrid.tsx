@@ -3,9 +3,9 @@ import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { VendingMachineFilters } from "./VendingMachineFilters";
 import { VendingMachinePagination } from "./VendingMachinePagination";
-
-import { addMachine, getUsers } from './../api';
-import { refreshPage } from './../utils';
+import { addMachine } from './../api';
+import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 interface VendingMachine {
   id: string;
@@ -32,6 +32,7 @@ export function VendingMachineGrid({
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showOffline, setShowOffline] = React.useState(false);
   const [showEmptyStock, setShowEmptyStock] = React.useState(false);
+  const navigate = useNavigate();
   const itemsPerPage = 6;
 
   const handleAddMachine = (newMachine: {
@@ -48,8 +49,19 @@ export function VendingMachineGrid({
       newMachine.userName,
       newMachine.totalSlots,
       newMachine.phone
-    ).then((err) => {
-      refreshPage();
+    ).then(() => {
+      toast({
+        title: "Success",
+        description: "Machine added successfully"
+      });
+      // Use React Router to refresh the page
+      navigate(0);
+    }).catch(error => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add machine"
+      });
     });
   };
 

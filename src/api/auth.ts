@@ -1,6 +1,7 @@
+
 import axios from 'axios';
 import { HOST, getAuthConfig } from './config';
-import { TOKEN, refreshPage } from '../utils';
+import { TOKEN } from '../utils';
 
 export const login = async (username: string, password: string) => {
   try {
@@ -30,9 +31,10 @@ export function handle401(error: any) {
 
     if (!token) {
       localStorage.setItem("isAuth", "false");
-      refreshPage();
+      // Don't use refreshPage() here - let React Router handle this
+      window.location.href = "/login"; // This is safe as we're doing a full redirect
+    } else {
+      refresh(usr!, token!);
     }
-
-    refresh(usr!, token!);
   }
 }
