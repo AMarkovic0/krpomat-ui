@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DateRange } from "react-day-picker";
+import { dateToIso } from "@/utils";
 
 const MIN3 = 3*60000;
 const loadDateTime = (new Date()).getTime();
@@ -28,32 +29,35 @@ function checkOnline(start_date, end_date) {
   return end_date > (new Date(dateToIso(start_date)).getTime() + MIN3);
 }
 
+// Helper function to check if a time is within 3 minutes of another time
+const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
+  const diffInMinutes = Math.abs(time1.getTime() - time2.getTime()) / (60 * 1000);
+  return diffInMinutes <= 3;
+};
+
 export const OnlineStateTimeline = ({ selectedMachine, sales, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
-    const selectedData = sales.find(m => m.machine_id === selectedMachine);
+    const selectedData = sales?.find(m => m.machine_id === selectedMachine);
     if (!selectedData || !dateRange?.from || !dateRange?.to) return [];
 
     const timelineData: TimelineEvent[] = [];
 
     let oldSaleDate = loadDateTime;
-    for (var sale in selectedData) {
-      timelineData.push({
-        timestamp: oldSaleDate,
-        status: checkOnline(sale.sale_date, oldSaleDate)
-      })
+    if (selectedData) {
+      for (var sale in selectedData) {
+        if (sale && selectedData[sale] && selectedData[sale].sale_date) {
+          timelineData.push({
+            timestamp: new Date(oldSaleDate),
+            status: checkOnline(selectedData[sale].sale_date, oldSaleDate) ? 1 : 0
+          });
 
-      oldSaleDate.sale.sale_date;
+          oldSaleDate = new Date(dateToIso(selectedData[sale].sale_date)).getTime();
+        }
+      }
     }
 
-    console.log("AAAAA", timelineData);
-
+    console.log("Timeline data generated:", timelineData);
     return timelineData;
-  }
-
-  // Helper function to check if a time is within 3 minutes of another time
-  const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
-    const diffInMinutes = Math.abs(time1.getTime() - time2.getTime()) / (60 * 1000);
-    return diffInMinutes <= 3;
   };
 
   const timelineData = generateTimelineData();
