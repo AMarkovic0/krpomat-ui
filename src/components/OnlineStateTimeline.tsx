@@ -38,26 +38,27 @@ const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
 
 export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
-    const selectedData = sales?.find(m => m.machine_id === selectedMachine);
+    const selectedData = sales?.filter((m) => m.machine_id === selectedMachine);
     if (!selectedData || !dateRange?.from || !dateRange?.to) return [];
 
     const timelineData: TimelineEvent[] = [];
 
     let oldSaleDate = loadDateTime;
     if (selectedData) {
-      for (var sale in selectedData) {
-        if (sale && selectedData[sale] && selectedData[sale].sale_date) {
+      for (var sale_index in selectedData) {
+        let sale = selectedData[sale_index];
+
+        if (sale && sale.sale_date) {
           timelineData.push({
-            timestamp: new Date(oldSaleDate),
-            status: checkOnline(selectedData[sale].sale_date, oldSaleDate) ? 1 : 0
+            timestamp: sale.sale_date,
+            status: checkOnline(sale.sale_date, oldSaleDate) ? 1 : 0
           });
 
-          oldSaleDate = new Date(dateToIso(selectedData[sale].sale_date)).getTime();
+          oldSaleDate = new Date(dateToIso(sale.sale_date)).getTime();
         }
       }
     }
 
-    console.log("Timeline data generated:", timelineData);
     return timelineData;
   };
 
