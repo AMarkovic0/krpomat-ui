@@ -147,6 +147,7 @@ const Index = () => {
             salesData={salesData}
             selectedMachine={selectedMachine}
             machines={filteredMachines}
+            dateRange={date}
           />
         </div>
       </div>

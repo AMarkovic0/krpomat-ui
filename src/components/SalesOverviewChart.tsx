@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from "date-fns"; // Changed from dayjs to date-fns since it's already in use
-
+import { format, isValid, parseISO } from "date-fns";
 import { getSales } from './../api';
+import { dateToIso } from "@/utils";
 
 interface SalesOverviewChartProps {
   salesData: any[];
@@ -15,60 +15,49 @@ interface SalesOverviewChartProps {
     name: string;
     totalSlots: number;
   }>;
+  dateRange: {
+    from: Date | undefined;
+    to: Date | undefined;
+  };
 }
 
 const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
-function getToday() {
-  const today = new Date();
-  const month = today.getMonth() + 1;
-  const year = today.getFullYear();
-  const date = today.getDate();
-  return `${date}.${month}.${year}.`;
-}
-
-function getDefaultStartDate() {
-  const today = new Date();
-  let month = today.getMonth();
-  let year = today.getFullYear();
-  const date = today.getDate();
-
-  if (month == 0) {
-    month = 12;
-    year = year - 1;
-  }
-
-  return `${date}.${month}.${year}.`;
-}
-
-export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: SalesOverviewChartProps) => {
-  const [salesDataForSelected, setSalesDataForSelected] = useState([]);
+export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: SalesOverviewChartProps) => {
+  const [salesData, setSalesData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const selectedMachineData = selectedMachine ? machines.find(m => m.id === selectedMachine) : null;
   const numSlots = selectedMachineData?.totalSlots || 1;
 
   useEffect(() => {
-    // If we already have data, don't fetch again
-    if (salesDataForSelected.length > 0) return;
+    if (!dateRange?.from || !dateRange?.to) return;
     
     let isMounted = true;
     setIsLoading(true);
     
     const fetchSalesData = async () => {
       try {
-        const data = await getSales({
-          start_date: getDefaultStartDate(),
-          end_date: getToday(),
-          machine_id: selectedMachine
-        });
+        const formattedFromDate = `${dateRange.from.getDate()}.${dateRange.from.getMonth() + 1}.${dateRange.from.getFullYear()}.`;
+        const formattedToDate = `${dateRange.to.getDate()}.${dateRange.to.getMonth() + 1}.${dateRange.to.getFullYear()}.`;
+        
+        const salesParams = {
+          start_date: formattedFromDate,
+          end_date: formattedToDate,
+          machine_id: selectedMachine || undefined
+        };
+        
+        const data = await getSales(salesParams);
         
         if (isMounted) {
-          setSalesDataForSelected(data);
+          // Process the data to aggregate by date
+          const processedData = processDataByDate(data);
+          setSalesData(processedData);
           setIsLoading(false);
         }
       } catch (error) {
         console.error("Error fetching sales data:", error);
         if (isMounted) {
+          setSalesData([]);
           setIsLoading(false);
         }
       }
@@ -79,9 +68,50 @@ export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: Sal
     return () => {
       isMounted = false;
     };
-  }, [selectedMachine]);
+  }, [dateRange, selectedMachine]);
 
-  console.log(salesData);
+  // Process the data to aggregate by date and slot
+  const processDataByDate = (data: any[]) => {
+    if (!data || !data.length) return [];
+
+    const dateMap = new Map();
+
+    data.forEach(sale => {
+      if (!sale || !sale.sale_date) return;
+      
+      try {
+        // Extract the date part only
+        const dateParts = sale.sale_date.split(' ')[0].split('.');
+        const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+        
+        if (!dateMap.has(formattedDate)) {
+          // Initialize date entry with all slots at 0
+          const dateEntry = { date: formattedDate };
+          for (let i = 1; i <= numSlots; i++) {
+            dateEntry[`slot${i}`] = 0;
+          }
+          dateMap.set(formattedDate, dateEntry);
+        }
+        
+        // Increment the appropriate slot for this sale
+        const slotNum = sale.prod_id ? Math.min(parseInt(sale.prod_id), numSlots) : 1;
+        const dateEntry = dateMap.get(formattedDate);
+        dateEntry[`slot${slotNum}`] = (dateEntry[`slot${slotNum}`] || 0) + 1;
+      } catch (error) {
+        console.error("Error processing sale date:", sale.sale_date, error);
+      }
+    });
+
+    // Convert map to array and sort by date
+    const result = Array.from(dateMap.values())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map(entry => ({
+        ...entry,
+        date: format(new Date(entry.date), 'MMM dd') // Format date for display
+      }));
+    
+    return result;
+  };
 
   return (
     <Card className="min-w-[300px]">
@@ -93,26 +123,40 @@ export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: Sal
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[250px] sm:h-[300px]">
-        <ChartContainer config={{}}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Legend wrapperStyle={{ fontSize: '12px' }} />
-              {Array.from({ length: numSlots }, (_, i) => (
-                <Bar
-                  key={`slot${i + 1}`}
-                  dataKey={`slot${i + 1}`}
-                  stackId="a"
-                  fill={slotColors[i]}
-                  name={`Slot ${i + 1}`}
-                  radius={[4, 4, 0, 0]}
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">Loading sales data...</p>
+          </div>
+        ) : salesData.length > 0 ? (
+          <ChartContainer config={{}}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: '12px' }} />
+                {Array.from({ length: numSlots }, (_, i) => (
+                  <Bar
+                    key={`slot${i + 1}`}
+                    dataKey={`slot${i + 1}`}
+                    stackId="a"
+                    fill={slotColors[i % slotColors.length]}
+                    name={`Slot ${i + 1}`}
+                    radius={[4, 4, 0, 0]}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground">
+              {dateRange?.from && dateRange?.to
+                ? 'No sales data available for the selected period'
+                : 'Select a date range to view sales data'}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
