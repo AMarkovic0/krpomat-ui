@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-import { TOKEN, refreshPage, isProd } from '../utils';
+import { TOKEN, isProd } from '../utils';
+import { useRefresh } from '../utils/navigation';
 
 const HOST_ADDRESS = isProd() ? "app.krpomat.rs" : "localhost";
 const HOST_PORT = isProd() ? 443 : 5000;
@@ -18,7 +19,8 @@ function handle401(error) {
 
     if (token === null) {
         localStorage.setItem("isAuth", false);
-        refreshPage();
+        // Use window.location redirection for this global error handler
+        window.location.href = "/login";
     }
 
     refresh(usr, token);
