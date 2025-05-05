@@ -81,6 +81,8 @@ export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: Sal
     };
   }, [selectedMachine]);
 
+  console.log(salesData);
+
   return (
     <Card className="min-w-[300px]">
       <CardHeader>

@@ -4,6 +4,9 @@ import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { DateRange } from "react-day-picker";
 
+const MIN3 = 3*60000;
+const loadDateTime = (new Date()).getTime();
+
 interface TimelineEvent {
   timestamp: Date;
   status: number;
@@ -21,66 +24,31 @@ interface OnlineStateTimelineProps {
   dateRange: DateRange | undefined;
 }
 
-export const OnlineStateTimeline = ({ selectedMachine, machines, dateRange }: OnlineStateTimelineProps) => {
-  // Generate timeline data based on machine history
+function checkOnline(start_date, end_date) {
+  return end_date > (new Date(dateToIso(start_date)).getTime() + MIN3);
+}
+
+export const OnlineStateTimeline = ({ selectedMachine, sales, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
-    const selectedMachineData = machines.find(m => m.id === selectedMachine);
-    if (!selectedMachineData || !dateRange?.from || !dateRange?.to) return [];
+    const selectedData = sales.find(m => m.machine_id === selectedMachine);
+    if (!selectedData || !dateRange?.from || !dateRange?.to) return [];
 
     const timelineData: TimelineEvent[] = [];
-    const endDate = new Date(dateRange.to);
-    const startDate = new Date(dateRange.from);
-    
-    // If we have lastSeen data, use it to determine online status
-    if (selectedMachineData.lastSeen) {
-      // Create initial data point at the start of the range
+
+    let oldSaleDate = loadDateTime;
+    for (var sale in selectedData) {
       timelineData.push({
-        timestamp: new Date(startDate),
-        // Check if the machine was online at the beginning of the time range
-        // A machine is considered offline if no data for more than 3 minutes
-        status: isWithinThreeMinutes(startDate, selectedMachineData.lastSeen) ? 1 : 0,
-      });
+        timestamp: oldSaleDate,
+        status: checkOnline(sale.sale_date, oldSaleDate)
+      })
 
-      // If we have onlineStatusChanged data, add those points
-      if (selectedMachineData.onlineStatusChanged) {
-        const statusChangeTime = new Date(selectedMachineData.onlineStatusChanged);
-        
-        // Only add if it's within our date range
-        if (statusChangeTime >= startDate && statusChangeTime <= endDate) {
-          // Get the previous status before the change
-          const previousStatus = timelineData[timelineData.length - 1].status;
-          
-          // Add the status change event (status flips from previous)
-          timelineData.push({
-            timestamp: statusChangeTime,
-            status: previousStatus === 1 ? 0 : 1
-          });
-        }
-      }
-
-      // Add the lastSeen point if it's within our range
-      const lastSeenDate = new Date(selectedMachineData.lastSeen);
-      if (lastSeenDate >= startDate && lastSeenDate <= endDate) {
-        // Get current online status based on the 3-minute threshold
-        const currentStatus = selectedMachineData.isOnline ? 1 : 0;
-        
-        // Add the last seen point
-        timelineData.push({
-          timestamp: lastSeenDate,
-          status: currentStatus
-        });
-      }
-
-      // Ensure the data ends with the current state
-      timelineData.push({
-        timestamp: endDate,
-        status: selectedMachineData.isOnline ? 1 : 0
-      });
+      oldSaleDate.sale.sale_date;
     }
 
-    // Sort timeline data by timestamp
-    return timelineData.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-  };
+    console.log("AAAAA", timelineData);
+
+    return timelineData;
+  }
 
   // Helper function to check if a time is within 3 minutes of another time
   const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
