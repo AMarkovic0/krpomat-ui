@@ -15,6 +15,7 @@ interface TimelineEvent {
 
 interface OnlineStateTimelineProps {
   selectedMachine: string | null;
+  sales: any; // Define a more specific type if possible
   machines: Array<{
     id: string;
     name: string;
@@ -35,7 +36,7 @@ const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
   return diffInMinutes <= 3;
 };
 
-export const OnlineStateTimeline = ({ selectedMachine, sales, dateRange }: OnlineStateTimelineProps) => {
+export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
     const selectedData = sales?.find(m => m.machine_id === selectedMachine);
     if (!selectedData || !dateRange?.from || !dateRange?.to) return [];
@@ -71,7 +72,7 @@ export const OnlineStateTimeline = ({ selectedMachine, sales, dateRange }: Onlin
     <Card className="min-w-[300px]">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg">
-          {selectedMachine
+          {selectedMachine && machines
             ? `Online Status Timeline - ${machines.find(m => m.id === selectedMachine)?.name}`
             : 'Select a machine to view its online status timeline'}
         </CardTitle>

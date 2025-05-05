@@ -135,7 +135,8 @@ const Index = () => {
 
       <div className="mb-6">
         <OnlineStateTimeline
-          selectedMachine={salesData}
+          selectedMachine={selectedMachine}
+          sales={salesData}
           machines={machines}
           dateRange={date}
         />
