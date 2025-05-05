@@ -7,10 +7,10 @@ import { VendingMachineGrid } from "@/components/VendingMachineGrid";
 import { SalesOverviewChart } from "@/components/SalesOverviewChart";
 import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
-import { generateSalesData } from "@/utils/mockData";
 import { DateTime } from "luxon";
 
-import { getMachines } from "../api";
+import { getMachines, getSales } from "../api";
+import { dateToIso } from "@/utils";
 
 const MIN10_IN_MS = 60 * 1000 * 10;
 
@@ -21,9 +21,8 @@ const Index = () => {
     to: new Date()
   });
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
-  const [salesData, setSalesData] = useState(() =>
-    generateSalesData(subDays(new Date(), 6), new Date())
-  );
+  const [salesData, setSalesData] = useState<any[]>([]);
+  const [isLoadingSales, setIsLoadingSales] = useState(false);
 
   const [machines, setMachines] = useState<any[]>([]);
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
@@ -78,6 +77,35 @@ const Index = () => {
     fetchMachines();
   }, [repackMachines]);
 
+  // Fetch sales data when date range or selected machine changes
+  useEffect(() => {
+    const fetchSalesData = async () => {
+      if (!date?.from || !date?.to) return;
+      
+      setIsLoadingSales(true);
+      try {
+        const formattedFromDate = `${date.from.getDate()}.${date.from.getMonth() + 1}.${date.from.getFullYear()}.`;
+        const formattedToDate = `${date.to.getDate()}.${date.to.getMonth() + 1}.${date.to.getFullYear()}.`;
+        
+        const salesParams = {
+          start_date: formattedFromDate,
+          end_date: formattedToDate,
+          machine_id: selectedMachine || undefined
+        };
+        
+        const data = await getSales(salesParams);
+        setSalesData(data);
+        setIsLoadingSales(false);
+      } catch (error) {
+        console.error('Error fetching sales data:', error);
+        setSalesData([]);
+        setIsLoadingSales(false);
+      }
+    };
+
+    fetchSalesData();
+  }, [date, selectedMachine]);
+
   const filterMachines = useCallback((machineList: any[], query: string) => {
     const filtered = machineList.filter(
       (machine) =>
@@ -94,21 +122,11 @@ const Index = () => {
 
   const handleDateSelect = useCallback((newDate: DateRange | undefined) => {
     setDate(newDate);
-    if (newDate?.from && newDate?.to) {
-      setSalesData(generateSalesData(newDate.from, newDate.to, selectedMachine));
-    }
-  }, [selectedMachine]);
+  }, []);
 
   const handleMachineSelect = useCallback((machineId: string) => {
     setSelectedMachine(machineId === selectedMachine ? null : machineId);
-    if (date?.from && date?.to) {
-      setSalesData(generateSalesData(
-        date.from,
-        date.to,
-        machineId === selectedMachine ? undefined : machineId
-      ));
-    }
-  }, [selectedMachine, date]);
+  }, [selectedMachine]);
 
   return (
     <div className="container mx-auto py-4 px-2 sm:py-8 sm:px-4">
