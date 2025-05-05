@@ -15,7 +15,7 @@ interface TimelineEvent {
 
 interface OnlineStateTimelineProps {
   selectedMachine: string | null;
-  sales: any; // Define a more specific type if possible
+  sales: any[]; // Define a more specific type if possible
   machines: Array<{
     id: string;
     name: string;
@@ -26,7 +26,7 @@ interface OnlineStateTimelineProps {
   dateRange: DateRange | undefined;
 }
 
-function checkOnline(start_date, end_date) {
+function checkOnline(start_date: string, end_date: number) {
   return end_date > (new Date(dateToIso(start_date)).getTime() + MIN3);
 }
 
@@ -39,22 +39,30 @@ const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
 export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
     const selectedData = sales?.filter((m) => m.machine_id === selectedMachine);
-    if (!selectedData || !dateRange?.from || !dateRange?.to) return [];
+    if (!selectedData || !selectedData.length || !dateRange?.from || !dateRange?.to) return [];
 
     const timelineData: TimelineEvent[] = [];
 
     let oldSaleDate = loadDateTime;
     if (selectedData) {
-      for (var sale_index in selectedData) {
-        let sale = selectedData[sale_index];
-
+      for (let i = 0; i < selectedData.length; i++) {
+        const sale = selectedData[i];
+        
         if (sale && sale.sale_date) {
-          timelineData.push({
-            timestamp: sale.sale_date,
-            status: checkOnline(sale.sale_date, oldSaleDate) ? 1 : 0
-          });
-
-          oldSaleDate = new Date(dateToIso(sale.sale_date)).getTime();
+          try {
+            // Make sure the timestamp is a valid Date object
+            const saleDate = new Date(dateToIso(sale.sale_date));
+            if (!isNaN(saleDate.getTime())) {
+              timelineData.push({
+                timestamp: saleDate,
+                status: checkOnline(sale.sale_date, oldSaleDate) ? 1 : 0
+              });
+              
+              oldSaleDate = saleDate.getTime();
+            }
+          } catch (error) {
+            console.error("Error parsing date:", sale.sale_date, error);
+          }
         }
       }
     }
@@ -63,11 +71,26 @@ export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRang
   };
 
   const timelineData = generateTimelineData();
-  const formattedData = timelineData.map(event => ({
-    timestamp: format(event.timestamp, 'MM/dd HH:mm'),
-    status: event.status,
-    raw: event.timestamp, // Keep the raw timestamp for tooltip sorting
-  }));
+  
+  // Format data safely with valid date checks
+  const formattedData = timelineData.map(event => {
+    // Make sure the timestamp is valid before formatting
+    if (!event.timestamp || isNaN(event.timestamp.getTime())) {
+      console.error("Invalid timestamp:", event.timestamp);
+      // Return a placeholder with current time as fallback
+      return {
+        timestamp: "Invalid date",
+        status: event.status,
+        raw: new Date() // Fallback to current date
+      };
+    }
+    
+    return {
+      timestamp: format(event.timestamp, 'MM/dd HH:mm'),
+      status: event.status,
+      raw: event.timestamp, // Keep the raw timestamp for tooltip sorting
+    };
+  });
 
   return (
     <Card className="min-w-[300px]">
@@ -79,7 +102,7 @@ export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRang
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {selectedMachine ? (
+        {selectedMachine && formattedData.length > 0 ? (
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={formattedData}>
@@ -118,7 +141,9 @@ export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRang
           </div>
         ) : (
           <p className="text-center text-muted-foreground py-8">
-            Click on a machine card to view its online status timeline
+            {selectedMachine 
+              ? 'No timeline data available for the selected time period'
+              : 'Click on a machine card to view its online status timeline'}
           </p>
         )}
       </CardContent>
