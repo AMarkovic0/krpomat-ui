@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
@@ -25,11 +25,12 @@ const Index = () => {
     generateSalesData(subDays(new Date(), 6), new Date())
   );
 
-  const machines = [];
-  const [filteredMachines, setMachines] = useState([]);
+  const [machines, setMachines] = useState<any[]>([]);
+  const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const repackMachines = (machine: any, index: number) => {
-    machines[index] = {
+  const repackMachines = useCallback((machine: any, index: number) => {
+    const repacked = {
       id: machine.machine_id,
       name: machine.machine_name,
       location: machine.machine_name,
@@ -48,44 +49,57 @@ const Index = () => {
       phoneNumber: machine.phone_number,
     };
 
-    let lastSeenTimeOffset = machines[index].lastSeen.getTime() + MIN10_IN_MS;
-    machines[index].isOnline = new Date(lastSeenTimeOffset) > new Date();
-  }
+    let lastSeenTimeOffset = repacked.lastSeen.getTime() + MIN10_IN_MS;
+    repacked.isOnline = new Date(lastSeenTimeOffset) > new Date();
+    
+    return repacked;
+  }, []);
 
-  if (filteredMachines.length === 0) {
-    getMachines().then((data) => {
-      data.forEach(repackMachines);
+  useEffect(() => {
+    const fetchMachines = async () => {
+      if (filteredMachines.length > 0) return;
+      
+      setIsLoading(true);
+      try {
+        const data = await getMachines();
+        const repackedMachines = data.map((machine: any, index: number) => 
+          repackMachines(machine, index)
+        );
+        
+        setMachines(repackedMachines);
+        filterMachines(repackedMachines, searchQuery);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching machines:', error);
+        setIsLoading(false);
+      }
+    };
 
-      const tmpFilteredMachines = machines.filter(
-        (machine) =>
-          machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          machine.location.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    fetchMachines();
+  }, [repackMachines]);
 
-      setMachines(tmpFilteredMachines);
-    });
-  }
-
-  const searchQueryChangeHandler = (query: string) => {
-    setSearchQuery(query);
-
-    const tmpFilteredMachines = machines.filter(
+  const filterMachines = useCallback((machineList: any[], query: string) => {
+    const filtered = machineList.filter(
       (machine) =>
-        machine.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        machine.location.toLowerCase().includes(searchQuery.toLowerCase())
+        machine.name.toLowerCase().includes(query.toLowerCase()) ||
+        machine.location.toLowerCase().includes(query.toLowerCase())
     );
+    setFilteredMachines(filtered);
+  }, []);
 
-    setMachines(tmpFilteredMachines);
-  };
+  const searchQueryChangeHandler = useCallback((query: string) => {
+    setSearchQuery(query);
+    filterMachines(machines, query);
+  }, [machines, filterMachines]);
 
-  const handleDateSelect = (newDate: DateRange | undefined) => {
+  const handleDateSelect = useCallback((newDate: DateRange | undefined) => {
     setDate(newDate);
     if (newDate?.from && newDate?.to) {
       setSalesData(generateSalesData(newDate.from, newDate.to, selectedMachine));
     }
-  };
+  }, [selectedMachine]);
 
-  const handleMachineSelect = (machineId: string) => {
+  const handleMachineSelect = useCallback((machineId: string) => {
     setSelectedMachine(machineId === selectedMachine ? null : machineId);
     if (date?.from && date?.to) {
       setSalesData(generateSalesData(
@@ -94,7 +108,7 @@ const Index = () => {
         machineId === selectedMachine ? undefined : machineId
       ));
     }
-  };
+  }, [selectedMachine, date]);
 
   return (
     <div className="container mx-auto py-4 px-2 sm:py-8 sm:px-4">

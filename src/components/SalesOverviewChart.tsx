@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,16 +43,43 @@ function getDefaultStartDate() {
 
 export const SalesOverviewChart = ({ salesData, selectedMachine, machines }: SalesOverviewChartProps) => {
   const [salesDataForSelected, setSalesDataForSelected] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const selectedMachineData = selectedMachine ? machines.find(m => m.id === selectedMachine) : null;
   const numSlots = selectedMachineData?.totalSlots || 1;
 
-  if (salesDataForSelected.length === 0) {
-    getSales({
-      start_date: getDefaultStartDate(),
-      end_date: getToday(),
-      machine_id: selectedMachine
-    }).then((data) => { setSalesDataForSelected(data) });
-  }
+  useEffect(() => {
+    // If we already have data, don't fetch again
+    if (salesDataForSelected.length > 0) return;
+    
+    let isMounted = true;
+    setIsLoading(true);
+    
+    const fetchSalesData = async () => {
+      try {
+        const data = await getSales({
+          start_date: getDefaultStartDate(),
+          end_date: getToday(),
+          machine_id: selectedMachine
+        });
+        
+        if (isMounted) {
+          setSalesDataForSelected(data);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching sales data:", error);
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchSalesData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedMachine]);
 
   return (
     <Card className="min-w-[300px]">
