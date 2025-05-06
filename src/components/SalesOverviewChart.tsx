@@ -31,26 +31,28 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
 
   useEffect(() => {
     if (!dateRange?.from || !dateRange?.to) return;
-    
+
     let isMounted = true;
     setIsLoading(true);
-    
+
     const fetchSalesData = async () => {
       try {
         const formattedFromDate = `${dateRange.from.getDate()}.${dateRange.from.getMonth() + 1}.${dateRange.from.getFullYear()}.`;
         const formattedToDate = `${dateRange.to.getDate()}.${dateRange.to.getMonth() + 1}.${dateRange.to.getFullYear()}.`;
-        
+
         const salesParams = {
           start_date: formattedFromDate,
           end_date: formattedToDate,
           machine_id: selectedMachine || undefined
         };
-        
+
         const data = await getSales(salesParams);
-        
+
         if (isMounted) {
+          // Process the data to filter only selected machine
+          const selectedMachineSale = processDataByMachine(data, selectedMachine);
           // Process the data to aggregate by date
-          const processedData = processDataByDate(data);
+          const processedData = processDataByDate(selectedMachineSale);
           setSalesData(processedData);
           setIsLoading(false);
         }
@@ -64,11 +66,25 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
     };
 
     fetchSalesData();
-    
+
     return () => {
       isMounted = false;
     };
   }, [dateRange, selectedMachine]);
+
+  const processDataByMachine = (data: any[], selectedMachine) => {
+    if (!data || !data.length) return [];
+
+    if (!selectedMachine) return data;
+
+    try {
+      return data.filter((sale) => sale.machine_id === selectedMachine);
+    } catch (error) {
+      console.error("Error processing sale by selected machine:", selectedMachine, error);
+    }
+
+    return [];
+  };
 
   // Process the data to aggregate by date and slot
   const processDataByDate = (data: any[]) => {
@@ -78,12 +94,12 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
 
     data.forEach(sale => {
       if (!sale || !sale.sale_date) return;
-      
+
       try {
         // Extract the date part only
         const dateParts = sale.sale_date.split(' ')[0].split('.');
         const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-        
+
         if (!dateMap.has(formattedDate)) {
           // Initialize date entry with all slots at 0
           const dateEntry = { date: formattedDate };
@@ -92,7 +108,7 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
           }
           dateMap.set(formattedDate, dateEntry);
         }
-        
+
         // Increment the appropriate slot for this sale
         const slotNum = sale.prod_id ? Math.min(parseInt(sale.prod_id), numSlots) : 1;
         const dateEntry = dateMap.get(formattedDate);
@@ -109,7 +125,7 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
         ...entry,
         date: format(new Date(entry.date), 'MMM dd') // Format date for display
       }));
-    
+
     return result;
   };
 
