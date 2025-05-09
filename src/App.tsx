@@ -1,11 +1,11 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Header } from "./components/Header";
-import { useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Users from "./pages/Users";
@@ -16,16 +16,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAdmin } = useAuth();
   if (localStorage.getItem("isAuth") !== "true") return <Navigate to="/login" />;
+  if (!isAdmin) return <Navigate to="/" />;
   return <>{children}</>;
 };
 
 const AppRoutes = () => {
-  const getAuth = () => {
-    const isAuth = localStorage.getItem("isAuth");
-    return isAuth === 'true';
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -52,20 +49,24 @@ const AppRoutes = () => {
   );
 };
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+// The AppRoutes component needs to be wrapped in AuthProvider
+// but we already have AuthProvider at the app level
+const App = () => {
+  const queryClient = new QueryClient();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

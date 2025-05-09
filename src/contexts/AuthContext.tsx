@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { login as login_api } from "../api";
 import { TOKEN } from '../utils';
 
@@ -24,6 +25,20 @@ export const mockUsers = [
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+
+  // Initialize user state from localStorage when component mounts
+  useEffect(() => {
+    const isAuth = localStorage.getItem("isAuth") === "true";
+    const username = localStorage.getItem("username");
+    
+    if (isAuth && username) {
+      setUser({
+        id: String(Date.now()), // We don't have the actual ID stored, so generate one
+        email: username,
+        role: username === "admin" ? "admin" : "user"
+      });
+    }
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     try {
