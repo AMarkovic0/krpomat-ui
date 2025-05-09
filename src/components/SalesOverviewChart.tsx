@@ -16,14 +16,26 @@ interface SalesOverviewChartProps {
     totalSlots: number;
   }>;
   dateRange: DateRange | undefined;
+  searchQuery?: string;
 }
 
 const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
-export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: SalesOverviewChartProps) => {
+export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searchQuery = "" }: SalesOverviewChartProps) => {
   const [salesData, setSalesData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const selectedMachineData = selectedMachine ? machines.find(m => m.id === selectedMachine) : null;
+  
+  // Get the selected machine data, considering the search query
+  const selectedMachineData = selectedMachine 
+    ? machines.find(m => m.id === selectedMachine) 
+    : null;
+  
+  // Filter machines based on search query if no specific machine is selected
+  const filteredMachines = searchQuery && !selectedMachine 
+    ? machines.filter(machine => 
+        machine.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : machines;
+  
   const numSlots = selectedMachineData?.totalSlots || 1;
 
   useEffect(() => {
@@ -48,10 +60,10 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
         const data = await getSales(salesParams);
 
         if (isMounted) {
-          // Process the data to filter only selected machine
-          const selectedMachineSale = processDataByMachine(data, selectedMachine);
+          // Process the data to filter only selected machine or by search query
+          const filteredSales = processDataByMachine(data, selectedMachine, filteredMachines, searchQuery);
           // Process the data to aggregate by date
-          const processedData = processDataByDate(selectedMachineSale);
+          const processedData = processDataByDate(filteredSales);
           setSalesData(processedData);
           setIsLoading(false);
         }
@@ -69,20 +81,29 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
     return () => {
       isMounted = false;
     };
-  }, [dateRange, selectedMachine]);
+  }, [dateRange, selectedMachine, machines, searchQuery, filteredMachines]);
 
-  const processDataByMachine = (data: any[], selectedMachine) => {
+  const processDataByMachine = (data: any[], selectedMachine, filteredMachines, searchQuery) => {
     if (!data || !data.length) return [];
 
-    if (!selectedMachine) return data;
-
     try {
-      return data.filter((sale) => sale.machine_id === selectedMachine);
+      // If a specific machine is selected, filter by that machine
+      if (selectedMachine) {
+        return data.filter((sale) => sale.machine_id === selectedMachine);
+      }
+      
+      // If there's a search query but no specific machine selected, filter by machine names
+      if (searchQuery && filteredMachines.length > 0) {
+        const filteredMachineIds = filteredMachines.map(machine => machine.id);
+        return data.filter(sale => filteredMachineIds.includes(sale.machine_id));
+      }
+      
+      // Otherwise return all data
+      return data;
     } catch (error) {
-      console.error("Error processing sale by selected machine:", selectedMachine, error);
+      console.error("Error processing sale by filter:", error);
+      return [];
     }
-
-    return [];
   };
 
   // Process the data to aggregate by date and slot
@@ -134,7 +155,9 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
         <CardTitle className="text-base sm:text-lg">
           {selectedMachineData
             ? `Sales Overview - ${selectedMachineData.name}`
-            : 'Sales Overview - All Machines'}
+            : searchQuery 
+              ? `Sales Overview - Filtered by "${searchQuery}"`
+              : 'Sales Overview - All Machines'}
         </CardTitle>
       </CardHeader>
       <CardContent className="h-[250px] sm:h-[300px]">
@@ -167,7 +190,9 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">
               {dateRange?.from
-                ? 'No sales data available for the selected period'
+                ? searchQuery 
+                  ? 'No sales data available for the filtered machines'
+                  : 'No sales data available for the selected period'
                 : 'Select a date range to view sales data'}
             </p>
           </div>
