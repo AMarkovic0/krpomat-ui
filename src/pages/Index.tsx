@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { DateRange } from "react-day-picker";
@@ -80,12 +79,13 @@ const Index = () => {
   // Fetch sales data when date range or selected machine changes
   useEffect(() => {
     const fetchSalesData = async () => {
-      if (!date?.from || !date?.to) return;
+      if (!date?.from) return;
+      const toDate = date?.to || new Date(); // Use current date as fallback if to is undefined
       
       setIsLoadingSales(true);
       try {
         const formattedFromDate = `${date.from.getDate()}.${date.from.getMonth() + 1}.${date.from.getFullYear()}.`;
-        const formattedToDate = `${date.to.getDate()}.${date.to.getMonth() + 1}.${date.to.getFullYear()}.`;
+        const formattedToDate = `${toDate.getDate()}.${toDate.getMonth() + 1}.${toDate.getFullYear()}.`;
         
         const salesParams = {
           start_date: formattedFromDate,

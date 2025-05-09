@@ -39,7 +39,7 @@ const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
 export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
     const selectedData = sales?.filter((m) => m.machine_id === selectedMachine);
-    if (!selectedData || !selectedData.length || !dateRange?.from || !dateRange?.to) return [];
+    if (!selectedData || !selectedData.length || !dateRange?.from) return [];
 
     const timelineData: TimelineEvent[] = [];
 

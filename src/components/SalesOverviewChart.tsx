@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, isValid, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { getSales } from './../api';
 import { dateToIso } from "@/utils";
+import { DateRange } from "react-day-picker";
 
 interface SalesOverviewChartProps {
   salesData: any[];
@@ -15,10 +15,7 @@ interface SalesOverviewChartProps {
     name: string;
     totalSlots: number;
   }>;
-  dateRange: {
-    from: Date | undefined;
-    to: Date | undefined;
-  };
+  dateRange: DateRange | undefined;
 }
 
 const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
@@ -30,7 +27,9 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
   const numSlots = selectedMachineData?.totalSlots || 1;
 
   useEffect(() => {
-    if (!dateRange?.from || !dateRange?.to) return;
+    if (!dateRange?.from) return;
+    
+    const toDate = dateRange?.to || new Date(); // Use current date as fallback if to is undefined
 
     let isMounted = true;
     setIsLoading(true);
@@ -38,7 +37,7 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
     const fetchSalesData = async () => {
       try {
         const formattedFromDate = `${dateRange.from.getDate()}.${dateRange.from.getMonth() + 1}.${dateRange.from.getFullYear()}.`;
-        const formattedToDate = `${dateRange.to.getDate()}.${dateRange.to.getMonth() + 1}.${dateRange.to.getFullYear()}.`;
+        const formattedToDate = `${toDate.getDate()}.${toDate.getMonth() + 1}.${toDate.getFullYear()}.`;
 
         const salesParams = {
           start_date: formattedFromDate,
@@ -167,7 +166,7 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange }: Sal
         ) : (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">
-              {dateRange?.from && dateRange?.to
+              {dateRange?.from
                 ? 'No sales data available for the selected period'
                 : 'Select a date range to view sales data'}
             </p>
