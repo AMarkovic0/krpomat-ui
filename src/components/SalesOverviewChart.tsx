@@ -82,10 +82,10 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
     if (!data || !data.length) return [];
 
     try {
-      if (selectedMachine) {
-        return data.filter((sale) => sale.machine_id === selectedMachine);
-      } else if (searchQuery) {
+      if (searchQuery) {
         return data.filter((sale) => sale.machine_name.toLowerCase().includes(searchQuery.toLowerCase()));
+      } else if (selectedMachineData) {
+        return data.filter((sale) => sale.machine_id === selectedMachine);
       }
 
       return data;
