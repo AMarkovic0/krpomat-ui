@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUsers, getUsernames, addUser, editUsername, editPassword } from "@/api/users";
+import { getUsers, addUser, editUsername, editPassword } from "@/api/users";
 
 const createUserSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -69,12 +69,12 @@ const Users = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       if (!isAdmin) return;
-      
+
       try {
         setIsLoading(true);
         // Get the usernames (array of strings)
-        const usernames = await getUsernames();
-        
+        const usernames = await getUsers();
+
         if (Array.isArray(usernames)) {
           // Transform usernames into the format needed for the component
           const formattedUsers = usernames.map((username: string) => ({
@@ -116,7 +116,7 @@ const Users = () => {
   const handleSave = async (id: string) => {
     const user = users.find((u) => u.id === id);
     if (!user) return;
-    
+
     try {
       // If username changed, update username
       if (user.username !== editForm.username) {
@@ -125,7 +125,7 @@ const Users = () => {
           throw new Error(usernameResult.error);
         }
       }
-      
+
       // If password provided, update password
       if (editForm.password) {
         const passwordResult = await editPassword(editForm.username, editForm.password);
@@ -133,7 +133,7 @@ const Users = () => {
           throw new Error(passwordResult.error);
         }
       }
-      
+
       // Update local state
       setUsers((prev) =>
         prev.map((u) =>
@@ -145,7 +145,7 @@ const Users = () => {
             : u
         )
       );
-      
+
       setEditingId(null);
       toast({
         title: "Success",
@@ -167,18 +167,18 @@ const Users = () => {
       if (result.error) {
         throw new Error(result.error);
       }
-      
+
       // Add the new user to the list
       const newUser = {
         id: result.id || String(Date.now()),
         username: values.username,
         role: values.role,
       };
-      
+
       setUsers([...users, newUser]);
       setIsCreateDialogOpen(false);
       form.reset();
-      
+
       toast({
         title: "Success",
         description: "User created successfully",

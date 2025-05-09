@@ -19,22 +19,6 @@ export const getUsers = async () => {
   }
 };
 
-export const getUsernames = async () => {
-  const token = localStorage.getItem(TOKEN());
-  const config = {
-    ...getAuthConfig(token!),
-    url: HOST + '/User'
-  };
-
-  try {
-    const { data } = await axios.request(config);
-    return data; // This should return an array of strings (usernames)
-  } catch (error) {
-    handle401(error);
-    return [];
-  }
-};
-
 export const addUser = async (name: string, pass: string) => {
   const token = localStorage.getItem(TOKEN());
   const config = {
