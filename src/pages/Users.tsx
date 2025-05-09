@@ -37,10 +37,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUsers, addUser, editUsername, editPassword } from "@/api/users";
+import { getUsers, getUsernames, addUser, editUsername, editPassword } from "@/api/users";
 
 const createUserSchema = z.object({
-  email: z.string().email(),
+  username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.enum(["admin", "user"]),
 });
@@ -50,7 +50,7 @@ const Users = () => {
   const { toast } = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({
-    email: "",
+    username: "",
     password: "",
   });
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -60,7 +60,7 @@ const Users = () => {
   const form = useForm<z.infer<typeof createUserSchema>>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
       role: "user",
     },
@@ -72,20 +72,22 @@ const Users = () => {
       
       try {
         setIsLoading(true);
-        const data = await getUsers();
-        if (Array.isArray(data)) {
-          // Map API data to our component's expected format
-          const formattedUsers = data.map((user: any) => ({
-            id: user.id || String(Date.now() + Math.random()),
-            email: user.username,
-            role: user.username === "admin" ? "admin" : "user",
+        // Get the usernames (array of strings)
+        const usernames = await getUsernames();
+        
+        if (Array.isArray(usernames)) {
+          // Transform usernames into the format needed for the component
+          const formattedUsers = usernames.map((username: string) => ({
+            id: String(Date.now() + Math.random()), // Generate a temporary ID
+            username: username,
+            role: username === "admin" ? "admin" : "user",
           }));
           setUsers(formattedUsers);
         } else {
           toast({
             variant: "destructive",
             title: "Error fetching users",
-            description: "Could not fetch users data",
+            description: "Could not fetch usernames data",
           });
         }
       } catch (error) {
@@ -106,7 +108,7 @@ const Users = () => {
   const handleEdit = (user: typeof users[0]) => {
     setEditingId(user.id);
     setEditForm({
-      email: user.email,
+      username: user.username,
       password: "",
     });
   };
@@ -116,9 +118,9 @@ const Users = () => {
     if (!user) return;
     
     try {
-      // If email changed, update username
-      if (user.email !== editForm.email) {
-        const usernameResult = await editUsername(user.email, editForm.email);
+      // If username changed, update username
+      if (user.username !== editForm.username) {
+        const usernameResult = await editUsername(user.username, editForm.username);
         if (usernameResult.error) {
           throw new Error(usernameResult.error);
         }
@@ -126,7 +128,7 @@ const Users = () => {
       
       // If password provided, update password
       if (editForm.password) {
-        const passwordResult = await editPassword(editForm.email, editForm.password);
+        const passwordResult = await editPassword(editForm.username, editForm.password);
         if (passwordResult.error) {
           throw new Error(passwordResult.error);
         }
@@ -138,7 +140,7 @@ const Users = () => {
           u.id === id
             ? {
                 ...u,
-                email: editForm.email,
+                username: editForm.username,
               }
             : u
         )
@@ -161,7 +163,7 @@ const Users = () => {
 
   const onCreateUser = async (values: z.infer<typeof createUserSchema>) => {
     try {
-      const result = await addUser(values.email, values.password);
+      const result = await addUser(values.username, values.password);
       if (result.error) {
         throw new Error(result.error);
       }
@@ -169,7 +171,7 @@ const Users = () => {
       // Add the new user to the list
       const newUser = {
         id: result.id || String(Date.now()),
-        email: values.email,
+        username: values.username,
         role: values.role,
       };
       
@@ -210,12 +212,12 @@ const Users = () => {
               >
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} type="email" />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -270,7 +272,7 @@ const Users = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Email</TableHead>
+              <TableHead>Username</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -294,13 +296,13 @@ const Users = () => {
                   <TableCell>
                     {editingId === user.id ? (
                       <Input
-                        value={editForm.email}
+                        value={editForm.username}
                         onChange={(e) =>
-                          setEditForm({ ...editForm, email: e.target.value })
+                          setEditForm({ ...editForm, username: e.target.value })
                         }
                       />
                     ) : (
-                      user.email
+                      user.username
                     )}
                   </TableCell>
                   <TableCell>{user.role}</TableCell>
