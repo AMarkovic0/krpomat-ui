@@ -1,10 +1,5 @@
 
-import * as React from 'react';
-import Typography from '@mui/material/Typography';
-import Link from '@mui/material/Link';
-
-// We'll remove the refreshPage function as it's causing security issues
-// and replace it with a better approach using React Router
+// Remove the unused React and Material UI imports
 
 export function TOKEN() { return "booolassw"; };
 
