@@ -97,7 +97,7 @@ export function VendingMachineCard({
                     "h-2 w-2 rounded-full",
                     stockLevel[index]
                       ? "bg-primary"
-                      : "bg-gray-200"
+                      : (isOnline ? "bg-red-500" : "bg-gray-200")
                   )}
                 />
               ))}
