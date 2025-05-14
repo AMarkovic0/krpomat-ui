@@ -82,6 +82,21 @@ export function VendingMachineGrid({
     currentPage * itemsPerPage
   );
 
+  // Helper function to convert stockLevel number to boolean array
+  const convertStockLevelToArray = (level: number, totalSlots: number): boolean[] => {
+    // This is a simple conversion - you might need to adjust based on your logic
+    // For now, we'll use a percentage and distribute filled slots evenly
+    const filledSlotCount = Math.round((level / 100) * totalSlots);
+    const stockArray = Array(totalSlots).fill(false);
+    
+    // Fill the first 'filledSlotCount' slots
+    for (let i = 0; i < filledSlotCount; i++) {
+      stockArray[i] = true;
+    }
+    
+    return stockArray;
+  };
+
   return (
     <div className="space-y-6">
       <VendingMachineFilters
@@ -97,10 +112,17 @@ export function VendingMachineGrid({
           {paginatedMachines.map((machine) => (
             <VendingMachineCard
               key={machine.id}
-              {...machine}
-              phoneNumber={machine.phoneNumber || ""} // Add phoneNumber property with a default empty string
+              id={machine.id}
+              name={machine.name}
+              location={machine.location}
+              isOnline={machine.isOnline}
+              lastSeen={machine.lastSeen}
+              stockLevel={convertStockLevelToArray(machine.stockLevel, machine.totalSlots)}
+              totalSlots={machine.totalSlots}
               isSelected={machine.id === selectedMachine}
               onClick={() => onMachineSelect(machine.id)}
+              companyName={machine.companyName}
+              phoneNumber={machine.phoneNumber || ""}
             />
           ))}
         </div>
