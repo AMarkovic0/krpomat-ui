@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -11,7 +10,7 @@ interface VendingMachineCardProps {
   location: string;
   isOnline: boolean;
   lastSeen: Date;
-  stockLevel: boolean[]; // Changed from number to boolean[]
+  stockLevel: number;
   totalSlots: number;
   filledSlots?: number[];
   isSelected?: boolean;
@@ -34,29 +33,15 @@ export function VendingMachineCard({
   companyName,
   phoneNumber,
 }: VendingMachineCardProps) {
-  const [stockLevel, setStockLevel] = React.useState<boolean[]>(
-    Array.isArray(initialStockLevel) ? initialStockLevel : Array(initialTotalSlots).fill(false)
-  );
+  const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
   const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
 
-  const filledSlotsCount = stockLevel.filter(Boolean).length;
-  const stockPercentage = (filledSlotsCount / totalSlots) * 100;
+  const stockPercentage = (stockLevel / totalSlots) * 100;
   const isLowStock = stockPercentage < 20;
 
   const handleSettingsUpdate = (newSlots: number) => {
     setTotalSlots(newSlots);
-    // Adjust stockLevel array to match new slot count
-    setStockLevel(prevStockLevel => {
-      if (prevStockLevel.length > newSlots) {
-        return prevStockLevel.slice(0, newSlots);
-      } else {
-        const newStockLevel = [...prevStockLevel];
-        while (newStockLevel.length < newSlots) {
-          newStockLevel.push(false);
-        }
-        return newStockLevel;
-      }
-    });
+    setStockLevel(Math.min(stockLevel, newSlots));
   };
 
   const getLastSeenString = (date) => {
@@ -110,7 +95,9 @@ export function VendingMachineCard({
                   key={index}
                   className={cn(
                     "h-2 w-2 rounded-full",
-                    stockLevel[index] ? "bg-primary" : "bg-gray-200"
+                    filledSlots.includes(index)
+                      ? "bg-primary"
+                      : "bg-gray-200"
                   )}
                 />
               ))}
