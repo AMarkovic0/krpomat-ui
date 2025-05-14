@@ -27,6 +27,17 @@ const Index = () => {
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const makeMachineStockLevel = useCallback((machine: any) => {
+    let levels = [];
+
+    for (let i = 1; i < machine.num_of_prod + 1; i++) {
+      let lvl = machine['p' + i];
+      levels.push(lvl === 1);
+    }
+
+    return levels;
+  }, []);
+
   const repackMachines = useCallback((machine: any, index: number) => {
     const repacked = {
       id: machine.machine_id,
@@ -41,7 +52,7 @@ const Index = () => {
         machine.online_status_changed,
         "dd.MM.yyyy HH:mm:ss"
       ).toJSDate(),
-      stockLevel: machine.p1,
+      stockLevel: makeMachineStockLevel(machine),
       totalSlots: machine.num_of_prod,
       companyName: machine.username,
       phoneNumber: machine.phone_number,
@@ -49,21 +60,21 @@ const Index = () => {
 
     let lastSeenTimeOffset = repacked.lastSeen.getTime() + MIN10_IN_MS;
     repacked.isOnline = new Date(lastSeenTimeOffset) > new Date();
-    
+
     return repacked;
   }, []);
 
   useEffect(() => {
     const fetchMachines = async () => {
       if (filteredMachines.length > 0) return;
-      
+
       setIsLoading(true);
       try {
         const data = await getMachines();
-        const repackedMachines = data.map((machine: any, index: number) => 
+        const repackedMachines = data.map((machine: any, index: number) =>
           repackMachines(machine, index)
         );
-        
+
         setMachines(repackedMachines);
         filterMachines(repackedMachines, searchQuery);
         setIsLoading(false);
@@ -81,18 +92,18 @@ const Index = () => {
     const fetchSalesData = async () => {
       if (!date?.from) return;
       const toDate = date?.to || new Date(); // Use current date as fallback if to is undefined
-      
+
       setIsLoadingSales(true);
       try {
         const formattedFromDate = `${date.from.getDate()}.${date.from.getMonth() + 1}.${date.from.getFullYear()}.`;
         const formattedToDate = `${toDate.getDate()}.${toDate.getMonth() + 1}.${toDate.getFullYear()}.`;
-        
+
         const salesParams = {
           start_date: formattedFromDate,
           end_date: formattedToDate,
           machine_id: selectedMachine || undefined
         };
-        
+
         const data = await getSales(salesParams);
         setSalesData(data);
         setIsLoadingSales(false);

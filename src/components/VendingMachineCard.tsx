@@ -10,7 +10,7 @@ interface VendingMachineCardProps {
   location: string;
   isOnline: boolean;
   lastSeen: Date;
-  stockLevel: number;
+  stockLevel: boolean[];
   totalSlots: number;
   filledSlots?: number[];
   isSelected?: boolean;
@@ -95,7 +95,7 @@ export function VendingMachineCard({
                   key={index}
                   className={cn(
                     "h-2 w-2 rounded-full",
-                    filledSlots.includes(index)
+                    stockLevel[index]
                       ? "bg-primary"
                       : "bg-gray-200"
                   )}
