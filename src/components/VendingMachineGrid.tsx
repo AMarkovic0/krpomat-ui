@@ -71,16 +71,28 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      return machine.isOnline && machine.stockLevel === 0;
+      let stock_level_status = true;
+
+      machine.stockLevel.forEach((lvl) => {
+        stock_level_status = stock_level_status && lvl;
+      });
+
+      return machine.isOnline && !stock_level_status;
     }
     return true;
   });
 
+  let paginatedMachines = [];
   const totalPages = Math.ceil(filteredMachines.length / itemsPerPage);
-  const paginatedMachines = filteredMachines.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  console.log("www", filteredMachines.length);
+  if (filteredMachines.length <= 6) {
+    paginatedMachines = filteredMachines;
+  } else {
+    paginatedMachines = filteredMachines.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }
 
   return (
     <div className="space-y-6">
