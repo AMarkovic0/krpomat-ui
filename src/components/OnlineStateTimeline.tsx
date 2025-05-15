@@ -7,18 +7,18 @@ import { dateToIso } from "@/utils";
 
 interface OnlineStateHistory {
   machine_id: number;
-  LastReport: string;
-  NewReport: string;
+  last_report: string;
+  new_report: string;
 }
 
 interface TimelineEvent {
   timestamp: Date;
-  status: number;
+  status: number; // 1 for online, 0 for offline
 }
 
 interface OnlineStateTimelineProps {
-  selectedMachine: number | null;
-  history: OnlineStateHistory[]; // Define a more specific type if possible
+  selectedMachine: string | null;
+  history: OnlineStateHistory[];
   machines: Array<{
     id: string;
     name: string;
@@ -29,64 +29,80 @@ interface OnlineStateTimelineProps {
   dateRange: DateRange | undefined;
 }
 
-const checkOnlineState = (selectedData, date) => {
+const checkOnlineState = (history: OnlineStateHistory[], timestamp: Date, machineId: number): number => {
+  // Default to online (1) unless we find an offline period that includes this timestamp
   let status = 1;
-
-  selectedData.forEach((node) => {
-    let last_report = new Date(dateToIso(node.last_report));
-    let new_report = new Date(dateToIso(node.new_report));
-
-    if (date >= last_report && date <= new_report) status = 0;
-  });
-
+  
+  // Filter history for the selected machine
+  const machineHistory = history.filter(item => item.machine_id === machineId);
+  
+  // Check if timestamp falls within any offline period
+  for (const period of machineHistory) {
+    const lastReport = new Date(dateToIso(period.last_report));
+    const newReport = new Date(dateToIso(period.new_report));
+    
+    // If timestamp is within offline period, set status to offline (0)
+    if (timestamp >= lastReport && timestamp <= newReport) {
+      status = 0;
+      break;
+    }
+  }
+  
   return status;
 };
 
 export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
-    const selectedData = history?.filter((m) => m.machine_id === selectedMachine);
-    if (!selectedData || !selectedData.length || !dateRange?.from) return [];
-
-    let timelineData = [];
-
-    for (var d = new Date(dateRange.from); d <= dateRange.to; d.setTime(d.getTime() + 5*60000)) {
+    if (!selectedMachine || !dateRange?.from) return [];
+    
+    const machineId = parseInt(selectedMachine);
+    if (isNaN(machineId)) return [];
+    
+    const timelineData: TimelineEvent[] = [];
+    const from = new Date(dateRange.from);
+    const to = dateRange.to ? new Date(dateRange.to) : new Date();
+    
+    // Generate data points at 5-minute intervals across the date range
+    for (let d = new Date(from); d <= to; d.setTime(d.getTime() + 5 * 60000)) {
       timelineData.push({
-        timestamp: d,
-        status: checkOnlineState(selectedData, d)
+        timestamp: new Date(d),
+        status: checkOnlineState(history, new Date(d), machineId)
       });
     }
-
+    
     return timelineData;
   };
 
   const timelineData = generateTimelineData();
 
-  // Format data safely with valid date checks
+  // Format data for the chart
   const formattedData = timelineData.map(event => {
-    // Make sure the timestamp is valid before formatting
     if (!event.timestamp || isNaN(event.timestamp.getTime())) {
       console.error("Invalid timestamp:", event.timestamp);
-      // Return a placeholder with current time as fallback
       return {
         timestamp: "Invalid date",
         status: event.status,
-        raw: new Date() // Fallback to current date
+        raw: new Date()
       };
     }
 
     return {
       timestamp: format(event.timestamp, 'MM/dd HH:mm'),
       status: event.status,
-      raw: event.timestamp, // Keep the raw timestamp for tooltip sorting
+      raw: event.timestamp,
     };
   });
+
+  // Find the selected machine name for display
+  const selectedMachineName = selectedMachine ? 
+    machines.find(m => m.id === selectedMachine)?.name : null;
 
   return (
     <Card className="min-w-[300px]">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg">
-          {selectedMachine && machines
-            ? `Online Status Timeline - ${machines.find(m => m.id === selectedMachine)?.name}`
+          {selectedMachine 
+            ? `Online Status Timeline - ${selectedMachineName || 'Machine #' + selectedMachine}` 
             : 'Select a machine to view its online status timeline'}
         </CardTitle>
       </CardHeader>
@@ -111,11 +127,6 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
                     'Status'
                   ]}
                   labelFormatter={(label) => `Time: ${label}`}
-                  // Sort by raw timestamp to ensure correct order
-                  itemSorter={(item) => {
-                    const dataItem = formattedData.find(d => d.timestamp === item.payload.timestamp);
-                    return dataItem?.raw ? -dataItem.raw.getTime() : 0;
-                  }}
                 />
                 <Line
                   type="stepAfter"
