@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -10,7 +11,7 @@ interface VendingMachineCardProps {
   location: string;
   isOnline: boolean;
   lastSeen: Date;
-  stockLevel: boolean[];
+  stockLevel: number;  // Changed to number to match VendingMachine interface
   totalSlots: number;
   filledSlots?: number[];
   isSelected?: boolean;
@@ -52,6 +53,26 @@ export function VendingMachineCard({
       format(lastSeen, 'dd/MM/yyyy HH:mm:ss');
   }
 
+  // Generate stock level indicators based on current stockLevel
+  const renderStockIndicators = () => {
+    return Array.from({ length: totalSlots }).map((_, index) => {
+      // Calculate if this slot should be filled
+      const isFilled = index < stockLevel;
+      
+      return (
+        <div
+          key={index}
+          className={cn(
+            "h-2 w-2 rounded-full",
+            isFilled
+              ? "bg-primary"
+              : (isOnline ? "bg-red-500" : "bg-gray-200")
+          )}
+        />
+      );
+    });
+  };
+
   return (
     <Card
       className={cn(
@@ -90,17 +111,7 @@ export function VendingMachineCard({
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Stock Level</span>
             <div className="flex gap-1">
-              {Array.from({ length: totalSlots }).map((_, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "h-2 w-2 rounded-full",
-                    stockLevel[index]
-                      ? "bg-primary"
-                      : (isOnline ? "bg-red-500" : "bg-gray-200")
-                  )}
-                />
-              ))}
+              {renderStockIndicators()}
             </div>
           </div>
           <div className="flex justify-between items-center">

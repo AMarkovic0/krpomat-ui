@@ -16,7 +16,7 @@ interface VendingMachine {
   stockLevel: number;
   totalSlots: number;
   companyName: string;
-  phoneNumber?: string; // Added phoneNumber property to the interface
+  phoneNumber?: string;
 }
 
 interface VendingMachineGridProps {
@@ -97,8 +97,15 @@ export function VendingMachineGrid({
           {paginatedMachines.map((machine) => (
             <VendingMachineCard
               key={machine.id}
-              {...machine}
-              phoneNumber={machine.phoneNumber || ""} // Add phoneNumber property with a default empty string
+              id={machine.id}
+              name={machine.name}
+              location={machine.location}
+              isOnline={machine.isOnline}
+              lastSeen={machine.lastSeen}
+              stockLevel={machine.stockLevel}
+              totalSlots={machine.totalSlots}
+              phoneNumber={machine.phoneNumber || ""}
+              companyName={machine.companyName}
               isSelected={machine.id === selectedMachine}
               onClick={() => onMachineSelect(machine.id)}
             />
