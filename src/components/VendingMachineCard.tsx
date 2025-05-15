@@ -11,7 +11,7 @@ interface VendingMachineCardProps {
   location: string;
   isOnline: boolean;
   lastSeen: Date;
-  stockLevel: number;  // Changed to number to match VendingMachine interface
+  stockLevel: boolean[];
   totalSlots: number;
   filledSlots?: number[];
   isSelected?: boolean;
@@ -57,8 +57,8 @@ export function VendingMachineCard({
   const renderStockIndicators = () => {
     return Array.from({ length: totalSlots }).map((_, index) => {
       // Calculate if this slot should be filled
-      const isFilled = index < stockLevel;
-      
+      const isFilled = stockLevel[index];
+
       return (
         <div
           key={index}

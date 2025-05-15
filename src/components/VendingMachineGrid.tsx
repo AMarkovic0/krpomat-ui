@@ -13,7 +13,7 @@ interface VendingMachine {
   location: string;
   isOnline: boolean;
   lastSeen: Date;
-  stockLevel: number;
+  stockLevel: boolean[];
   totalSlots: number;
   companyName: string;
   phoneNumber?: string;
