@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format } from "date-fns";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { format, differenceInMinutes, differenceInHours, startOfDay, endOfDay } from "date-fns";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { DateRange } from "react-day-picker";
 import { dateToIso } from "@/utils";
 
@@ -11,9 +11,10 @@ interface OnlineStateHistory {
   new_report: string;
 }
 
-interface TimelineEvent {
-  timestamp: Date;
-  status: number; // 1 for online, 0 for offline
+interface OnlineStateEvent {
+  startTime: Date;
+  endTime: Date;
+  status: number; // 0 for offline
 }
 
 interface OnlineStateTimelineProps {
@@ -29,69 +30,84 @@ interface OnlineStateTimelineProps {
   dateRange: DateRange | undefined;
 }
 
-const checkOnlineState = (history: OnlineStateHistory[], timestamp: Date, machineId: number): number => {
-  // Default to online (1) unless we find an offline period that includes this timestamp
-  let status = 1;
-  
-  // Filter history for the selected machine
-  const machineHistory = history.filter(item => item.machine_id === machineId);
-  
-  // Check if timestamp falls within any offline period
-  for (const period of machineHistory) {
-    const lastReport = new Date(dateToIso(period.last_report));
-    const newReport = new Date(dateToIso(period.new_report));
-    
-    // If timestamp is within offline period, set status to offline (0)
-    if (timestamp >= lastReport && timestamp <= newReport) {
-      status = 0;
-      break;
-    }
-  }
-  
-  return status;
-};
-
 export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRange }: OnlineStateTimelineProps) => {
-  const generateTimelineData = (): TimelineEvent[] => {
-    if (!selectedMachine || !dateRange?.from) return [];
+  const processHistoryData = (): OnlineStateEvent[] => {
+    if (!selectedMachine || !dateRange?.from || !history.length) return [];
     
     const machineId = parseInt(selectedMachine);
     if (isNaN(machineId)) return [];
     
-    const timelineData: TimelineEvent[] = [];
-    const from = new Date(dateRange.from);
-    const to = dateRange.to ? new Date(dateRange.to) : new Date();
+    // Filter history for the selected machine
+    const machineHistory = history.filter(item => item.machine_id === machineId);
     
-    // Generate data points at 5-minute intervals across the date range
-    for (let d = new Date(from); d <= to; d.setTime(d.getTime() + 5 * 60000)) {
-      timelineData.push({
-        timestamp: new Date(d),
-        status: checkOnlineState(history, new Date(d), machineId)
-      });
-    }
-    
-    return timelineData;
+    return machineHistory.map(period => ({
+      startTime: new Date(dateToIso(period.last_report)),
+      endTime: new Date(dateToIso(period.new_report)),
+      status: 0 // 0 represents offline periods
+    }));
   };
 
-  const timelineData = generateTimelineData();
-
-  // Format data for the chart
-  const formattedData = timelineData.map(event => {
-    if (!event.timestamp || isNaN(event.timestamp.getTime())) {
-      console.error("Invalid timestamp:", event.timestamp);
-      return {
-        timestamp: "Invalid date",
-        status: event.status,
-        raw: new Date()
-      };
+  const generateOptimizedData = () => {
+    if (!selectedMachine || !dateRange?.from) return [];
+    
+    const offlinePeriods = processHistoryData();
+    if (!offlinePeriods.length) return [];
+    
+    const from = dateRange.from;
+    const to = dateRange.to ? new Date(dateRange.to) : new Date();
+    
+    // Group by day for better visualization
+    const dailyData: { 
+      date: string;
+      formattedDate: string;
+      totalMinutes: number;
+      offlineMinutes: number;
+      onlinePercentage: number;
+    }[] = [];
+    
+    // Iterate through each day in the range
+    let currentDate = new Date(from);
+    while (currentDate <= to) {
+      const dayStart = startOfDay(currentDate);
+      const dayEnd = endOfDay(currentDate);
+      
+      // Calculate total minutes in the day (that are within our range)
+      const rangeStart = currentDate.getTime() === from.getTime() ? currentDate : dayStart;
+      const rangeEnd = currentDate.getTime() === to.getTime() ? to : dayEnd;
+      const totalMinutes = differenceInMinutes(rangeEnd, rangeStart);
+      
+      // Calculate offline minutes for this day
+      let offlineMinutes = 0;
+      for (const period of offlinePeriods) {
+        // Skip if period is completely outside this day
+        if (period.endTime < rangeStart || period.startTime > rangeEnd) continue;
+        
+        // Calculate intersection of period with this day
+        const overlapStart = period.startTime > rangeStart ? period.startTime : rangeStart;
+        const overlapEnd = period.endTime < rangeEnd ? period.endTime : rangeEnd;
+        
+        offlineMinutes += differenceInMinutes(overlapEnd, overlapStart);
+      }
+      
+      // Calculate online percentage
+      const onlinePercentage = Math.round(((totalMinutes - offlineMinutes) / totalMinutes) * 100);
+      
+      dailyData.push({
+        date: format(currentDate, 'yyyy-MM-dd'),
+        formattedDate: format(currentDate, 'MMM dd'),
+        totalMinutes,
+        offlineMinutes,
+        onlinePercentage
+      });
+      
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
     }
+    
+    return dailyData;
+  };
 
-    return {
-      timestamp: format(event.timestamp, 'MM/dd HH:mm'),
-      status: event.status,
-      raw: event.timestamp,
-    };
-  });
+  const timelineData = generateOptimizedData();
 
   // Find the selected machine name for display
   const selectedMachineName = selectedMachine ? 
@@ -107,36 +123,34 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {selectedMachine && formattedData.length > 0 ? (
+        {selectedMachine && timelineData.length > 0 ? (
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={formattedData}>
-                <XAxis
-                  dataKey="timestamp"
+              <BarChart data={timelineData} barGap={2}>
+                <XAxis 
+                  dataKey="formattedDate" 
                   tick={{ fontSize: 12 }}
                   interval="preserveStartEnd"
                 />
                 <YAxis
-                  domain={[0, 1]}
-                  ticks={[0, 1]}
-                  tickFormatter={(value) => (value === 1 ? 'Online' : 'Offline')}
+                  domain={[0, 100]}
+                  unit="%"
+                  tick={{ fontSize: 12 }}
+                  label={{ value: 'Online Time', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
                 />
                 <Tooltip
-                  formatter={(value: number) => [
-                    value === 1 ? 'Online' : 'Offline',
-                    'Status'
-                  ]}
-                  labelFormatter={(label) => `Time: ${label}`}
+                  formatter={(value: number) => [`${value}%`, 'Online Time']}
+                  labelFormatter={(label) => `Date: ${label}`}
                 />
-                <Line
-                  type="stepAfter"
-                  dataKey="status"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                  dot={{ strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, strokeWidth: 2 }}
-                />
-              </LineChart>
+                <ReferenceLine y={90} stroke="#ff4d4f" strokeDasharray="3 3" />
+                <Bar 
+                  dataKey="onlinePercentage" 
+                  fill="#10b981"
+                  radius={[4, 4, 0, 0]}
+                  name="Online %"
+                >
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         ) : (
