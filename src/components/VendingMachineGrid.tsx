@@ -84,7 +84,7 @@ export function VendingMachineGrid({
 
   let paginatedMachines = [];
   const totalPages = Math.ceil(filteredMachines.length / itemsPerPage);
-  console.log("www", filteredMachines.length);
+
   if (filteredMachines.length <= 6) {
     paginatedMachines = filteredMachines;
   } else {
