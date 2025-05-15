@@ -8,7 +8,7 @@ import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
 import { DateTime } from "luxon";
 
-import { getMachines, getSales } from "../api";
+import { getMachines, getSales, getOnlineStateHistory } from "../api";
 import { dateToIso } from "@/utils";
 
 const MIN10_IN_MS = 60 * 1000 * 10;
@@ -21,11 +21,11 @@ const Index = () => {
   });
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [salesData, setSalesData] = useState<any[]>([]);
-  const [isLoadingSales, setIsLoadingSales] = useState(false);
+
+  const [onlineStateHistory, setOnlineStateHistory] = useState<any[]>([]);
 
   const [machines, setMachines] = useState<any[]>([]);
   const [filteredMachines, setFilteredMachines] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const makeMachineStockLevel = useCallback((machine: any) => {
     let levels = [];
@@ -68,7 +68,6 @@ const Index = () => {
     const fetchMachines = async () => {
       if (filteredMachines.length > 0) return;
 
-      setIsLoading(true);
       try {
         const data = await getMachines();
         const repackedMachines = data.map((machine: any, index: number) =>
@@ -77,10 +76,8 @@ const Index = () => {
 
         setMachines(repackedMachines);
         filterMachines(repackedMachines, searchQuery);
-        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching machines:', error);
-        setIsLoading(false);
       }
     };
 
@@ -93,7 +90,6 @@ const Index = () => {
       if (!date?.from) return;
       const toDate = date?.to || new Date(); // Use current date as fallback if to is undefined
 
-      setIsLoadingSales(true);
       try {
         const formattedFromDate = `${date.from.getDate()}.${date.from.getMonth() + 1}.${date.from.getFullYear()}.`;
         const formattedToDate = `${toDate.getDate()}.${toDate.getMonth() + 1}.${toDate.getFullYear()}.`;
@@ -106,11 +102,12 @@ const Index = () => {
 
         const data = await getSales(salesParams);
         setSalesData(data);
-        setIsLoadingSales(false);
+
+        const history = await getOnlineStateHistory(salesParams);
+        setOnlineStateHistory(history);
       } catch (error) {
         console.error('Error fetching sales data:', error);
         setSalesData([]);
-        setIsLoadingSales(false);
       }
     };
 
@@ -167,7 +164,7 @@ const Index = () => {
       <div className="mb-6">
         <OnlineStateTimeline
           selectedMachine={selectedMachine}
-          sales={salesData}
+          history={onlineStateHistory}
           machines={machines}
           dateRange={date}
         />

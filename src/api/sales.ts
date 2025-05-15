@@ -19,3 +19,21 @@ export const getSales = async (salesData: any) => {
     return [];
   }
 };
+
+export const getOnlineStateHistory = async (salesData: any) => {
+  const token = localStorage.getItem(TOKEN());
+  const config = {
+    ...getAuthConfig(token!, 'post'),
+    url: HOST + '/OnlineStateHistory',
+    data: JSON.stringify(salesData)
+  };
+
+  try {
+    const { data } = await axios.request(config);
+    return data;
+  } catch (error) {
+    handle401(error);
+    return [];
+  }
+
+};

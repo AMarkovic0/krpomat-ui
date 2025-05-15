@@ -78,18 +78,3 @@ export const deleteMachine = async (machine_id: string) => {
     return error;
   }
 };
-
-export const getOnlineStateHistory = async () => {
-  const token = localStorage.getItem(TOKEN());
-  const config = {
-    ...getAuthConfig(token!),
-    url: HOST + '/OnlineStateHistory'
-  };
-
-  try {
-    const { data } = await axios.request(config);
-    return data;
-  } catch (error) {
-    return error;
-  }
-}

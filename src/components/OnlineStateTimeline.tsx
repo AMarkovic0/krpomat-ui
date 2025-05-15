@@ -5,8 +5,11 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { DateRange } from "react-day-picker";
 import { dateToIso } from "@/utils";
 
-const MIN3 = 3*60000;
-const loadDateTime = (new Date()).getTime();
+interface OnlineStateHistory {
+  machine_id: number;
+  LastReport: string;
+  NewReport: string;
+}
 
 interface TimelineEvent {
   timestamp: Date;
@@ -14,8 +17,8 @@ interface TimelineEvent {
 }
 
 interface OnlineStateTimelineProps {
-  selectedMachine: string | null;
-  sales: any[]; // Define a more specific type if possible
+  selectedMachine: number | null;
+  history: OnlineStateHistory[]; // Define a more specific type if possible
   machines: Array<{
     id: string;
     name: string;
@@ -26,52 +29,38 @@ interface OnlineStateTimelineProps {
   dateRange: DateRange | undefined;
 }
 
-function checkOnline(start_date: string, end_date: number) {
-  return end_date > (new Date(dateToIso(start_date)).getTime() + MIN3);
-}
+const checkOnlineState = (selectedData, date) => {
+  let status = 1;
 
-// Helper function to check if a time is within 3 minutes of another time
-const isWithinThreeMinutes = (time1: Date, time2: Date): boolean => {
-  const diffInMinutes = Math.abs(time1.getTime() - time2.getTime()) / (60 * 1000);
-  return diffInMinutes <= 3;
+  selectedData.forEach((node) => {
+    let last_report = new Date(dateToIso(node.last_report));
+    let new_report = new Date(dateToIso(node.new_report));
+
+    if (date >= last_report && date <= new_report) status = 0;
+  });
+
+  return status;
 };
 
-export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRange }: OnlineStateTimelineProps) => {
+export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRange }: OnlineStateTimelineProps) => {
   const generateTimelineData = (): TimelineEvent[] => {
-    const selectedData = sales?.filter((m) => m.machine_id === selectedMachine);
+    const selectedData = history?.filter((m) => m.machine_id === selectedMachine);
     if (!selectedData || !selectedData.length || !dateRange?.from) return [];
 
-    const timelineData: TimelineEvent[] = [];
+    let timelineData = [];
 
-    let oldSaleDate = loadDateTime;
-    if (selectedData) {
-      for (let i = 0; i < selectedData.length; i++) {
-        const sale = selectedData[i];
-        
-        if (sale && sale.sale_date) {
-          try {
-            // Make sure the timestamp is a valid Date object
-            const saleDate = new Date(dateToIso(sale.sale_date));
-            if (!isNaN(saleDate.getTime())) {
-              timelineData.push({
-                timestamp: saleDate,
-                status: checkOnline(sale.sale_date, oldSaleDate) ? 1 : 0
-              });
-              
-              oldSaleDate = saleDate.getTime();
-            }
-          } catch (error) {
-            console.error("Error parsing date:", sale.sale_date, error);
-          }
-        }
-      }
+    for (var d = new Date(dateRange.from); d <= dateRange.to; d.setTime(d.getTime() + 5*60000)) {
+      timelineData.push({
+        timestamp: d,
+        status: checkOnlineState(selectedData, d)
+      });
     }
 
     return timelineData;
   };
 
   const timelineData = generateTimelineData();
-  
+
   // Format data safely with valid date checks
   const formattedData = timelineData.map(event => {
     // Make sure the timestamp is valid before formatting
@@ -84,7 +73,7 @@ export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRang
         raw: new Date() // Fallback to current date
       };
     }
-    
+
     return {
       timestamp: format(event.timestamp, 'MM/dd HH:mm'),
       status: event.status,
@@ -141,7 +130,7 @@ export const OnlineStateTimeline = ({ selectedMachine, sales, machines, dateRang
           </div>
         ) : (
           <p className="text-center text-muted-foreground py-8">
-            {selectedMachine 
+            {selectedMachine
               ? 'No timeline data available for the selected time period'
               : 'Click on a machine card to view its online status timeline'}
           </p>
