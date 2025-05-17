@@ -18,6 +18,7 @@ interface VendingMachineCardProps {
   onClick?: () => void;
   companyName: string;
   phoneNumber: string;
+  avgSales: AverageSale;
 }
 
 export function VendingMachineCard({
@@ -33,18 +34,14 @@ export function VendingMachineCard({
   onClick,
   companyName,
   phoneNumber,
+  avgSales,
 }: VendingMachineCardProps) {
   const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
   const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
-  
-  // Generate random sales numbers
-  const [monthlySales] = React.useState(Math.floor(Math.random() * 5000) + 1000);
-  const [annualSales] = React.useState(monthlySales * (10 + Math.floor(Math.random() * 4)));
 
-  // Count filled slots for stock percentage
-  const filledSlotsCount = stockLevel.filter(Boolean).length;
-  const stockPercentage = (filledSlotsCount / totalSlots) * 100;
-  const isLowStock = stockPercentage < 20;
+  const round2 = (num) => {
+    return Math.round((num + Number.EPSILON) * 100) / 100;
+  };
 
   const handleSettingsUpdate = (newSlots: number) => {
     setTotalSlots(newSlots);
@@ -82,7 +79,7 @@ export function VendingMachineCard({
           className={cn(
             "h-2 w-2 rounded-full",
             isFilled
-              ? "bg-primary"
+              ? "bg-green-200"
               : (isOnline ? "bg-red-500" : "bg-gray-200")
           )}
         />
@@ -139,11 +136,15 @@ export function VendingMachineCard({
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Avg. Monthly Sale</span>
-            <span className="text-sm font-medium">${monthlySales.toLocaleString()}</span>
+            <span className="text-sm font-medium">{
+              avgSales.monthly && avgSales.monthly[id] ? round2(avgSales.monthly[id]) : 0
+            }</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Avg. Annual Sale</span>
-            <span className="text-sm font-medium">${annualSales.toLocaleString()}</span>
+            <span className="text-sm font-medium">{
+              avgSales.annual && avgSales.annual[id] ? round2(avgSales.annual[id]) : 0
+            }</span>
           </div>
         </div>
       </CardContent>

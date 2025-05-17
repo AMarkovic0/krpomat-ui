@@ -1,4 +1,3 @@
-
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { VendingMachineFilters } from "./VendingMachineFilters";
@@ -6,6 +5,11 @@ import { VendingMachinePagination } from "./VendingMachinePagination";
 import { addMachine } from './../api';
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+
+interface AverageSale {
+  monthly: number;
+  annual: number;
+}
 
 interface VendingMachine {
   id: string;
@@ -23,12 +27,14 @@ interface VendingMachineGridProps {
   machines: VendingMachine[];
   selectedMachine: string | null;
   onMachineSelect: (id: string) => void;
+  avgSales: AverageSale;
 }
 
 export function VendingMachineGrid({
   machines,
   selectedMachine,
   onMachineSelect,
+  avgSales,
 }: VendingMachineGridProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showOffline, setShowOffline] = React.useState(false);
@@ -114,6 +120,7 @@ export function VendingMachineGrid({
               totalSlots={machine.totalSlots}
               phoneNumber={machine.phoneNumber || ""}
               companyName={machine.companyName}
+              avgSales={avgSales}
               isSelected={machine.id === selectedMachine}
               onClick={() => onMachineSelect(machine.id)}
             />

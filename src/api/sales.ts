@@ -35,5 +35,20 @@ export const getOnlineStateHistory = async (salesData: any) => {
     handle401(error);
     return [];
   }
-
 };
+
+export const getAvgSales = async () => {
+  const token = localStorage.getItem(TOKEN());
+  const config = {
+    ...getAuthConfig(token!),
+    url: HOST + '/AvgSales',
+  };
+
+  try {
+    const { data } = await axios.request(config);
+    return data;
+  } catch (error) {
+    handle401(error);
+    return [];
+  }
+}

@@ -8,7 +8,7 @@ import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
 import { DateTime } from "luxon";
 
-import { getMachines, getSales, getOnlineStateHistory } from "../api";
+import { getMachines, getSales, getOnlineStateHistory, getAvgSales } from "../api";
 import { dateToIso } from "@/utils";
 
 const MIN10_IN_MS = 60 * 1000 * 10;
@@ -21,6 +21,10 @@ const Index = () => {
   });
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [salesData, setSalesData] = useState<any[]>([]);
+  const [avgSales, setAvgSalesData] = useState<AverageSale>({
+    monthly: 0,
+    annual: 0
+  });
 
   const [onlineStateHistory, setOnlineStateHistory] = useState<any[]>([]);
 
@@ -105,6 +109,9 @@ const Index = () => {
 
         const history = await getOnlineStateHistory(salesParams);
         setOnlineStateHistory(history);
+
+        const avg_sale = await getAvgSales();
+        setAvgSalesData(avg_sale);
       } catch (error) {
         console.error('Error fetching sales data:', error);
         setSalesData([]);
@@ -178,6 +185,7 @@ const Index = () => {
         machines={filteredMachines}
         selectedMachine={selectedMachine}
         onMachineSelect={handleMachineSelect}
+        avgSales={avgSales}
       />
     </div>
   );
