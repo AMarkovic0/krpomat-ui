@@ -6,8 +6,8 @@ import { format } from "date-fns";
 import { VendingMachineSettings } from "./VendingMachineSettings";
 
 interface AverageSale {
-  monthly: number;
-  annual: number;
+  monthly: number[];
+  annual: number[];
 }
 
 interface VendingMachineCardProps {
