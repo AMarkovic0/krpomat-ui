@@ -24,8 +24,8 @@ const Index = () => {
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [salesData, setSalesData] = useState<any[]>([]);
   const [avgSales, setAvgSalesData] = useState<AverageSale>({
-    monthly: 0,
-    annual: 0
+    monthly: {}, // Initialize as an empty object to match the expected type
+    annual: {}   // Initialize as an empty object to match the expected type
   });
 
   const [onlineStateHistory, setOnlineStateHistory] = useState<any[]>([]);
