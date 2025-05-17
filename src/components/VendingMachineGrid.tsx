@@ -5,11 +5,7 @@ import { VendingMachinePagination } from "./VendingMachinePagination";
 import { addMachine } from './../api';
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-
-interface AverageSale {
-  monthly: number;
-  annual: number;
-}
+import { AverageSale } from "@/types";
 
 interface VendingMachine {
   id: string;

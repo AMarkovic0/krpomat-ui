@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { DateRange } from "react-day-picker";
@@ -7,6 +8,7 @@ import { SalesOverviewChart } from "@/components/SalesOverviewChart";
 import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
 import { DateTime } from "luxon";
+import { AverageSale } from "@/types";
 
 import { getMachines, getSales, getOnlineStateHistory, getAvgSales } from "../api";
 import { dateToIso } from "@/utils";

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { VendingMachineSettings } from "./VendingMachineSettings";
+import { AverageSale } from "@/types";
 
 interface VendingMachineCardProps {
   id: string;
