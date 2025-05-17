@@ -6,11 +6,6 @@ import { addMachine } from './../api';
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
-interface AverageSale {
-  monthly: number;
-  annual: number;
-}
-
 interface VendingMachine {
   id: string;
   name: string;

@@ -5,6 +5,11 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { VendingMachineSettings } from "./VendingMachineSettings";
 
+interface AverageSale {
+  monthly: number;
+  annual: number;
+}
+
 interface VendingMachineCardProps {
   id: string;
   name: string;
