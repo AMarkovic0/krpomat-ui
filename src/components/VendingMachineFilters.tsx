@@ -1,18 +1,29 @@
+
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddMachineDialog } from "./AddMachineDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface VendingMachineFiltersProps {
   showOffline: boolean;
   showEmptyStock: boolean;
   onOfflineChange: (checked: boolean) => void;
   onEmptyStockChange: (checked: boolean) => void;
+  onSortChange?: (value: string) => void;
+  sortBy?: string;
   onAddMachine: (newMachine: {
     userName: string;
     name: string;
     id: string;
     totalSlots: number;
     phone: string;
+    companyName: string;
   }) => void;
 }
 
@@ -21,11 +32,26 @@ export function VendingMachineFilters({
   showEmptyStock,
   onOfflineChange,
   onEmptyStockChange,
+  onSortChange,
+  sortBy = "none",
   onAddMachine,
 }: VendingMachineFiltersProps) {
   return (
-    <div className="flex items-center gap-6 mb-4">
+    <div className="flex flex-wrap items-center gap-4 mb-4">
       <AddMachineDialog onConfirm={onAddMachine} />
+      
+      <div className="w-52">
+        <Select value={sortBy} onValueChange={onSortChange}>
+          <SelectTrigger className="h-9">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">No sorting</SelectItem>
+            <SelectItem value="monthly">By Avg. Monthly Sale</SelectItem>
+            <SelectItem value="annual">By Avg. Annual Sale</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">

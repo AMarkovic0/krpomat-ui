@@ -1,3 +1,4 @@
+
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { VendingMachineFilters } from "./VendingMachineFilters";
@@ -22,7 +23,10 @@ interface VendingMachineGridProps {
   machines: VendingMachine[];
   selectedMachine: string | null;
   onMachineSelect: (id: string) => void;
-  avgSales: AverageSale;
+  avgSales: {
+    monthly: { [machineId: string]: number };
+    annual: { [machineId: string]: number };
+  };
 }
 
 export function VendingMachineGrid({
@@ -34,6 +38,7 @@ export function VendingMachineGrid({
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showOffline, setShowOffline] = React.useState(false);
   const [showEmptyStock, setShowEmptyStock] = React.useState(false);
+  const [sortBy, setSortBy] = React.useState("none");
   const navigate = useNavigate();
   const itemsPerPage = 6;
 
@@ -79,13 +84,27 @@ export function VendingMachineGrid({
     return true;
   });
 
-  let paginatedMachines = [];
-  const totalPages = Math.ceil(filteredMachines.length / itemsPerPage);
+  // Sort machines based on selection
+  const sortedMachines = [...filteredMachines].sort((a, b) => {
+    if (sortBy === "monthly") {
+      const aValue = avgSales.monthly[a.id] || 0;
+      const bValue = avgSales.monthly[b.id] || 0;
+      return bValue - aValue; // Descending order
+    } else if (sortBy === "annual") {
+      const aValue = avgSales.annual[a.id] || 0;
+      const bValue = avgSales.annual[b.id] || 0;
+      return bValue - aValue; // Descending order
+    }
+    return 0; // Default, no sorting
+  });
 
-  if (filteredMachines.length <= 6) {
-    paginatedMachines = filteredMachines;
+  let paginatedMachines = [];
+  const totalPages = Math.ceil(sortedMachines.length / itemsPerPage);
+
+  if (sortedMachines.length <= 6) {
+    paginatedMachines = sortedMachines;
   } else {
-    paginatedMachines = filteredMachines.slice(
+    paginatedMachines = sortedMachines.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
@@ -98,6 +117,8 @@ export function VendingMachineGrid({
         showEmptyStock={showEmptyStock}
         onOfflineChange={setShowOffline}
         onEmptyStockChange={setShowEmptyStock}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
         onAddMachine={handleAddMachine}
       />
 

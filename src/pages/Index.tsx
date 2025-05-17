@@ -11,6 +11,12 @@ import { DateTime } from "luxon";
 import { getMachines, getSales, getOnlineStateHistory, getAvgSales } from "../api";
 import { dateToIso } from "@/utils";
 
+// Define the AverageSale type
+interface AverageSale {
+  monthly: { [machineId: string]: number };
+  annual: { [machineId: string]: number };
+}
+
 const MIN10_IN_MS = 60 * 1000 * 10;
 
 const Index = () => {
@@ -22,8 +28,8 @@ const Index = () => {
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [salesData, setSalesData] = useState<any[]>([]);
   const [avgSales, setAvgSalesData] = useState<AverageSale>({
-    monthly: 0,
-    annual: 0
+    monthly: {},
+    annual: {}
   });
 
   const [onlineStateHistory, setOnlineStateHistory] = useState<any[]>([]);
