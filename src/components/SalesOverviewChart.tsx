@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { ChartContainer } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
@@ -95,12 +96,31 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
     }
   };
 
-  // Process the data to aggregate by date and slot
+  // Process the data to aggregate by date and slot, ensuring all days have entries with zeros for no sales
   const processDataByDate = (data: any[]) => {
     if (!data || !data.length) return [];
 
     const dateMap = new Map();
+    
+    // Create a date range to ensure all days between from and to are included
+    if (dateRange?.from) {
+      const startDate = new Date(dateRange.from);
+      const endDate = dateRange?.to ? new Date(dateRange.to) : new Date();
+      
+      // Populate the map with all dates in range, initialized with zeros
+      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const formattedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        
+        // Initialize date entry with all slots at 0
+        const dateEntry = { date: formattedDate };
+        for (let i = 1; i <= numSlots; i++) {
+          dateEntry[`slot${i}`] = 0;
+        }
+        dateMap.set(formattedDate, dateEntry);
+      }
+    }
 
+    // Process actual sales data
     data.forEach(sale => {
       if (!sale || !sale.sale_date) return;
 
@@ -110,7 +130,8 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
         const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
 
         if (!dateMap.has(formattedDate)) {
-          // Initialize date entry with all slots at 0
+          // Initialize date entry with all slots at 0 if it doesn't exist
+          // (This shouldn't happen since we pre-populated all dates, but just in case)
           const dateEntry = { date: formattedDate };
           for (let i = 1; i <= numSlots; i++) {
             dateEntry[`slot${i}`] = 0;
