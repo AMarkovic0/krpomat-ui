@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { DateRange } from "react-day-picker";
@@ -8,7 +7,6 @@ import { SalesOverviewChart } from "@/components/SalesOverviewChart";
 import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
 import { DateTime } from "luxon";
-import { AverageSale } from "@/types";
 
 import { getMachines, getSales, getOnlineStateHistory, getAvgSales } from "../api";
 import { dateToIso } from "@/utils";
@@ -24,8 +22,8 @@ const Index = () => {
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [salesData, setSalesData] = useState<any[]>([]);
   const [avgSales, setAvgSalesData] = useState<AverageSale>({
-    monthly: {}, // Initialize as an empty object to match the expected type
-    annual: {}   // Initialize as an empty object to match the expected type
+    monthly: 0,
+    annual: 0
   });
 
   const [onlineStateHistory, setOnlineStateHistory] = useState<any[]>([]);
