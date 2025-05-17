@@ -50,9 +50,11 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
   const generateOptimizedData = () => {
     if (!selectedMachine || !dateRange?.from) return [];
     
-    const offlinePeriods = processHistoryData();
-    if (!offlinePeriods.length) return [];
+    // Find the selected machine to check if it's online
+    const selectedMachineObj = machines.find(m => m.id === selectedMachine);
+    const isSelectedMachineOnline = selectedMachineObj?.isOnline || false;
     
+    const offlinePeriods = processHistoryData();
     const from = dateRange.from;
     const to = dateRange.to ? new Date(dateRange.to) : new Date();
     
@@ -89,8 +91,15 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
         offlineMinutes += differenceInMinutes(overlapEnd, overlapStart);
       }
       
-      // Calculate online percentage
-      const onlinePercentage = Math.round(((totalMinutes - offlineMinutes) / totalMinutes) * 100);
+      // For online devices with no history data, set to 100% online
+      let onlinePercentage = 100;
+      if (offlinePeriods.length > 0) {
+        // Only calculate percentage if we have offline periods
+        onlinePercentage = Math.round(((totalMinutes - offlineMinutes) / totalMinutes) * 100);
+      } else if (!isSelectedMachineOnline) {
+        // If machine is offline and has no history, show as 0% online
+        onlinePercentage = 0;
+      }
       
       dailyData.push({
         date: format(currentDate, 'yyyy-MM-dd'),
