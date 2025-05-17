@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -6,8 +5,8 @@ import { format } from "date-fns";
 import { VendingMachineSettings } from "./VendingMachineSettings";
 
 interface AverageSale {
-  monthly: number[];
-  annual: number[];
+  monthly: { [machineId: string]: number };
+  annual: { [machineId: string]: number };
 }
 
 interface VendingMachineCardProps {
