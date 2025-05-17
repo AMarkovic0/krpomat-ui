@@ -71,13 +71,9 @@ export function VendingMachineGrid({
       return !machine.isOnline;
     }
     if (!showOffline && showEmptyStock) {
-      let stock_level_status = true;
-
-      machine.stockLevel.forEach((lvl) => {
-        stock_level_status = stock_level_status && lvl;
-      });
-
-      return machine.isOnline && !stock_level_status;
+      // Check if all stock levels are false (empty)
+      const hasEmptyStock = machine.stockLevel.every(slot => slot === false);
+      return machine.isOnline && hasEmptyStock;
     }
     return true;
   });

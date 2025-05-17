@@ -36,13 +36,30 @@ export function VendingMachineCard({
 }: VendingMachineCardProps) {
   const [stockLevel, setStockLevel] = React.useState(initialStockLevel);
   const [totalSlots, setTotalSlots] = React.useState(initialTotalSlots);
+  
+  // Generate random sales numbers
+  const [monthlySales] = React.useState(Math.floor(Math.random() * 5000) + 1000);
+  const [annualSales] = React.useState(monthlySales * (10 + Math.floor(Math.random() * 4)));
 
-  const stockPercentage = (stockLevel / totalSlots) * 100;
+  // Count filled slots for stock percentage
+  const filledSlotsCount = stockLevel.filter(Boolean).length;
+  const stockPercentage = (filledSlotsCount / totalSlots) * 100;
   const isLowStock = stockPercentage < 20;
 
   const handleSettingsUpdate = (newSlots: number) => {
     setTotalSlots(newSlots);
-    setStockLevel(Math.min(stockLevel, newSlots));
+    // Adjust stock level array to match new slot count
+    const newStockLevel = [...stockLevel];
+    if (newSlots > stockLevel.length) {
+      // Add new slots as empty (false)
+      for (let i = stockLevel.length; i < newSlots; i++) {
+        newStockLevel.push(false);
+      }
+    } else if (newSlots < stockLevel.length) {
+      // Remove excess slots
+      newStockLevel.splice(newSlots);
+    }
+    setStockLevel(newStockLevel);
   };
 
   const getLastSeenString = (date) => {
@@ -57,7 +74,7 @@ export function VendingMachineCard({
   const renderStockIndicators = () => {
     return Array.from({ length: totalSlots }).map((_, index) => {
       // Calculate if this slot should be filled
-      const isFilled = stockLevel[index];
+      const isFilled = index < stockLevel.length ? stockLevel[index] : false;
 
       return (
         <div
@@ -119,6 +136,14 @@ export function VendingMachineCard({
             <span className="text-sm font-medium">
               {getLastSeenString(lastSeen)}
             </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Avg. Monthly Sale</span>
+            <span className="text-sm font-medium">${monthlySales.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Avg. Annual Sale</span>
+            <span className="text-sm font-medium">${annualSales.toLocaleString()}</span>
           </div>
         </div>
       </CardContent>
