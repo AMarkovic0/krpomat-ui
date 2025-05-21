@@ -46,8 +46,8 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
       return machineHistory.map(period => ({
         startTime: new Date(dateToIso(period.last_report)),
         endTime: new Date(dateToIso(period.new_report)),
-        status: 0 // 0 represents offline periods
-        machineId: period.machineId
+        status: 0, // 0 represents offline periods
+        machineId: period.machine_id // Fixed: Added the missing machineId property
       }));
     }
 
@@ -56,7 +56,7 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
       startTime: new Date(dateToIso(period.last_report)),
       endTime: new Date(dateToIso(period.new_report)),
       status: 0,
-      machineId: period.machine_id
+      machineId: period.machine_id // Fixed: Added the missing machineId property
     }));
   };
 
