@@ -192,6 +192,8 @@ const Index = () => {
         selectedMachine={selectedMachine}
         onMachineSelect={handleMachineSelect}
         avgSales={avgSales}
+        onlineStateHistory={onlineStateHistory}
+        dateRange={date}
       />
     </div>
   );
