@@ -49,6 +49,7 @@ export function VendingMachineFilters({
             <SelectItem value="none">No sorting</SelectItem>
             <SelectItem value="monthly">By Avg. Monthly Sale</SelectItem>
             <SelectItem value="annual">By Avg. Annual Sale</SelectItem>
+            <SelectItem value="offline-count">By Offline Count</SelectItem>
           </SelectContent>
         </Select>
       </div>

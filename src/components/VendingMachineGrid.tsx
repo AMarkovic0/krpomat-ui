@@ -1,4 +1,3 @@
-
 import React from "react";
 import { VendingMachineCard } from "./VendingMachineCard";
 import { VendingMachineFilters } from "./VendingMachineFilters";
@@ -6,6 +5,8 @@ import { VendingMachinePagination } from "./VendingMachinePagination";
 import { addMachine } from './../api';
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { calculateOfflineCount } from "@/utils/offlineCalculations";
+import { DateRange } from "react-day-picker";
 
 interface VendingMachine {
   id: string;
@@ -19,6 +20,12 @@ interface VendingMachine {
   phoneNumber?: string;
 }
 
+interface OnlineStateHistory {
+  machine_id: number;
+  last_report: string;
+  new_report: string;
+}
+
 interface VendingMachineGridProps {
   machines: VendingMachine[];
   selectedMachine: string | null;
@@ -27,6 +34,8 @@ interface VendingMachineGridProps {
     monthly: { [machineId: string]: number };
     annual: { [machineId: string]: number };
   };
+  onlineStateHistory?: OnlineStateHistory[];
+  dateRange?: DateRange | undefined;
 }
 
 export function VendingMachineGrid({
@@ -34,6 +43,8 @@ export function VendingMachineGrid({
   selectedMachine,
   onMachineSelect,
   avgSales,
+  onlineStateHistory = [],
+  dateRange,
 }: VendingMachineGridProps) {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [showOffline, setShowOffline] = React.useState(false);
@@ -94,6 +105,10 @@ export function VendingMachineGrid({
       const aValue = avgSales.annual[a.id] || 0;
       const bValue = avgSales.annual[b.id] || 0;
       return bValue - aValue; // Descending order
+    } else if (sortBy === "offline-count") {
+      const aOfflineCount = calculateOfflineCount(a.id, onlineStateHistory, dateRange);
+      const bOfflineCount = calculateOfflineCount(b.id, onlineStateHistory, dateRange);
+      return bOfflineCount - aOfflineCount; // Descending order (most offline events first)
     }
     return 0; // Default, no sorting
   });
