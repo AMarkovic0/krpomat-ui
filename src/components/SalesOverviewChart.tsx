@@ -78,7 +78,7 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
 
   return (
     <Card className="min-w-[300px] w-full">
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="text-base sm:text-lg">
           {selectedMachineData
             ? `Sales Overview - ${selectedMachineData.name}`
@@ -87,13 +87,13 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
               : 'Sales Overview - All Machines'}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[250px] sm:h-[300px] p-2 sm:p-6">
+      <CardContent className="h-[250px] sm:h-[300px] p-2 pt-0">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Loading sales data...</p>
           </div>
         ) : salesData.length > 0 ? (
-          <div className="w-full h-full">
+          <div className="w-full h-full overflow-hidden">
             <SalesBarChart salesData={salesData} numSlots={numSlots} />
           </div>
         ) : (

@@ -16,23 +16,27 @@ export const SalesBarChart = ({ salesData, numSlots }: SalesBarChartProps) => {
         <BarChart 
           data={salesData} 
           margin={{ 
-            top: 10, 
-            right: 10, 
-            left: 0, 
-            bottom: 10 
+            top: 5, 
+            right: 5, 
+            left: 5, 
+            bottom: 5 
           }}
         >
           <XAxis 
             dataKey="date" 
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 10 }}
             tickLine={false}
             axisLine={false}
+            interval={0}
+            angle={-45}
+            textAnchor="end"
+            height={60}
           />
           <YAxis 
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 10 }}
             tickLine={false}
             axisLine={false}
-            width={30}
+            width={25}
           />
           <Tooltip 
             contentStyle={{
@@ -43,8 +47,8 @@ export const SalesBarChart = ({ salesData, numSlots }: SalesBarChartProps) => {
             }}
           />
           <Legend 
-            wrapperStyle={{ fontSize: '11px' }}
-            iconSize={12}
+            wrapperStyle={{ fontSize: '10px' }}
+            iconSize={10}
           />
           {Array.from({ length: numSlots }, (_, i) => (
             <Bar
@@ -53,7 +57,7 @@ export const SalesBarChart = ({ salesData, numSlots }: SalesBarChartProps) => {
               stackId="a"
               fill={slotColors[i % slotColors.length]}
               name={`Slot ${i + 1}`}
-              radius={[2, 2, 0, 0]}
+              radius={[1, 1, 0, 0]}
             />
           ))}
         </BarChart>
