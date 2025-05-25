@@ -42,6 +42,7 @@ export const processDataByDate = (
     if (!groupedByDate[dateKey]) {
       groupedByDate[dateKey] = {
         date: dateKey,
+        sortDate: date, // Keep the actual date for sorting
         ...Array.from({ length: numSlots }, (_, i) => ({ [`slot${i + 1}`]: 0 })).reduce((acc, slot) => ({ ...acc, ...slot }), {})
       };
     }
@@ -53,8 +54,8 @@ export const processDataByDate = (
     }
   });
   
-  // Convert to array and sort by date
-  return Object.values(groupedByDate).sort((a: any, b: any) => {
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
-  });
+  // Convert to array and sort by actual date (oldest to newest)
+  return Object.values(groupedByDate)
+    .sort((a: any, b: any) => a.sortDate.getTime() - b.sortDate.getTime())
+    .map(({ sortDate, ...rest }) => rest); // Remove sortDate from final result
 };
