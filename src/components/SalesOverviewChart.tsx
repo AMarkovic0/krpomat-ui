@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { ChartContainer } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { getSales } from './../api';
-import { dateToIso } from "@/utils";
 import { DateRange } from "react-day-picker";
+import { SalesBarChart } from "./SalesBarChart";
+import { processDataByMachine, processDataByDate } from "../utils/salesChartUtils";
 
 interface SalesOverviewChartProps {
   salesData: any[];
@@ -19,8 +18,6 @@ interface SalesOverviewChartProps {
   dateRange: DateRange | undefined;
   searchQuery?: string;
 }
-
-const slotColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c'];
 
 export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searchQuery = "" }: SalesOverviewChartProps) => {
   const [salesData, setSalesData] = useState([]);
@@ -57,9 +54,9 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
 
         if (isMounted) {
           // Process the data to filter only selected machine or by search query
-          const filteredSales = processDataByMachine(data, selectedMachine, searchQuery);
+          const filteredSales = processDataByMachine(data, selectedMachine, searchQuery, selectedMachineData);
           // Process the data to aggregate by date
-          const processedData = processDataByDate(filteredSales);
+          const processedData = processDataByDate(filteredSales, dateRange, numSlots, format);
           setSalesData(processedData);
           setIsLoading(false);
         }
@@ -79,88 +76,8 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
     };
   }, [dateRange, selectedMachine, machines, searchQuery]);
 
-  const processDataByMachine = (data: any[], selectedMachine, searchQuery) => {
-    if (!data || !data.length) return [];
-
-    try {
-      if (searchQuery) {
-        return data.filter((sale) => sale.machine_name.toLowerCase().includes(searchQuery.toLowerCase()));
-      } else if (selectedMachineData) {
-        return data.filter((sale) => sale.machine_id === selectedMachine);
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Error processing sale by filter:", error);
-      return [];
-    }
-  };
-
-  // Process the data to aggregate by date and slot, ensuring all days have entries with zeros for no sales
-  const processDataByDate = (data: any[]) => {
-    if (!data || !data.length) return [];
-
-    const dateMap = new Map();
-    
-    // Create a date range to ensure all days between from and to are included
-    if (dateRange?.from) {
-      const startDate = new Date(dateRange.from);
-      const endDate = dateRange?.to ? new Date(dateRange.to) : new Date();
-      
-      // Populate the map with all dates in range, initialized with zeros
-      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        const formattedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        
-        // Initialize date entry with all slots at 0
-        const dateEntry = { date: formattedDate };
-        for (let i = 1; i <= numSlots; i++) {
-          dateEntry[`slot${i}`] = 0;
-        }
-        dateMap.set(formattedDate, dateEntry);
-      }
-    }
-
-    // Process actual sales data
-    data.forEach(sale => {
-      if (!sale || !sale.sale_date) return;
-
-      try {
-        // Extract the date part only
-        const dateParts = sale.sale_date.split(' ')[0].split('.');
-        const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
-
-        if (!dateMap.has(formattedDate)) {
-          // Initialize date entry with all slots at 0 if it doesn't exist
-          // (This shouldn't happen since we pre-populated all dates, but just in case)
-          const dateEntry = { date: formattedDate };
-          for (let i = 1; i <= numSlots; i++) {
-            dateEntry[`slot${i}`] = 0;
-          }
-          dateMap.set(formattedDate, dateEntry);
-        }
-
-        // Increment the appropriate slot for this sale
-        const slotNum = sale.prod_id ? Math.min(parseInt(sale.prod_id), numSlots) : 1;
-        const dateEntry = dateMap.get(formattedDate);
-        dateEntry[`slot${slotNum}`] = (dateEntry[`slot${slotNum}`] || 0) + 1;
-      } catch (error) {
-        console.error("Error processing sale date:", sale.sale_date, error);
-      }
-    });
-
-    // Convert map to array and sort by date
-    const result = Array.from(dateMap.values())
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map(entry => ({
-        ...entry,
-        date: format(new Date(entry.date), 'MMM dd') // Format date for display
-      }));
-
-    return result;
-  };
-
   return (
-    <Card className="min-w-[300px]">
+    <Card className="min-w-[300px] w-full">
       <CardHeader>
         <CardTitle className="text-base sm:text-lg">
           {selectedMachineData
@@ -170,32 +87,15 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
               : 'Sales Overview - All Machines'}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[250px] sm:h-[300px]">
+      <CardContent className="h-[250px] sm:h-[300px] p-2 sm:p-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">Loading sales data...</p>
           </div>
         ) : salesData.length > 0 ? (
-          <ChartContainer config={{}}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: '12px' }} />
-                {Array.from({ length: numSlots }, (_, i) => (
-                  <Bar
-                    key={`slot${i + 1}`}
-                    dataKey={`slot${i + 1}`}
-                    stackId="a"
-                    fill={slotColors[i % slotColors.length]}
-                    name={`Slot ${i + 1}`}
-                    radius={[4, 4, 0, 0]}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+          <div className="w-full h-full">
+            <SalesBarChart salesData={salesData} numSlots={numSlots} />
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground">
