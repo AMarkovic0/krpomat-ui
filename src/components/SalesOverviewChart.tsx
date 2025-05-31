@@ -77,9 +77,9 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
   }, [dateRange, selectedMachine, machines, searchQuery]);
 
   return (
-    <Card className="min-w-[300px] w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base sm:text-lg">
+    <Card className="w-full h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium">
           {selectedMachineData
             ? `Sales Overview - ${selectedMachineData.name}`
             : searchQuery
@@ -87,18 +87,18 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
               : 'Sales Overview - All Machines'}
         </CardTitle>
       </CardHeader>
-      <CardContent className="h-[250px] sm:h-[300px] p-2 pt-0">
+      <CardContent className="p-3 pt-0">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">Loading sales data...</p>
+          <div className="flex items-center justify-center h-[200px]">
+            <p className="text-muted-foreground text-sm">Loading sales data...</p>
           </div>
         ) : salesData.length > 0 ? (
-          <div className="w-full h-full overflow-hidden">
+          <div className="w-full h-[200px]">
             <SalesBarChart salesData={salesData} numSlots={numSlots} />
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground">
+          <div className="flex items-center justify-center h-[200px]">
+            <p className="text-muted-foreground text-sm">
               {dateRange?.from
                 ? searchQuery
                   ? 'No sales data available for the filtered machines'
