@@ -37,7 +37,9 @@ export const processDataByDate = (
     const [datePart] = saleDate.split(' ');
     const [day, month, year] = datePart.split('.');
     const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    const dateKey = formatFn(date, 'MMM dd');
+    
+    // Use a more readable date format for labels
+    const dateKey = formatFn(date, 'dd MMM');
     
     if (!groupedByDate[dateKey]) {
       groupedByDate[dateKey] = {
