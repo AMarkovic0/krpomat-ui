@@ -170,6 +170,7 @@ const Index = () => {
             machines={filteredMachines}
             dateRange={date}
             searchQuery={searchQuery}
+            avgSales={avgSales}
           />
         </div>
       </div>
