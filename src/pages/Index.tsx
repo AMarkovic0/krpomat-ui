@@ -15,6 +15,7 @@ import { dateToIso } from "@/utils";
 interface AverageSale {
   monthly: { [machineId: string]: number };
   annual: { [machineId: string]: number };
+  selected: { [machineId: string]: number };
 }
 
 const MIN10_IN_MS = 60 * 1000 * 10;
@@ -116,7 +117,7 @@ const Index = () => {
         const history = await getOnlineStateHistory(salesParams);
         setOnlineStateHistory(history);
 
-        const avg_sale = await getAvgSales();
+        const avg_sale = await getAvgSales(salesParams);
         setAvgSalesData(avg_sale);
       } catch (error) {
         console.error('Error fetching sales data:', error);

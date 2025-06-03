@@ -37,11 +37,12 @@ export const getOnlineStateHistory = async (salesData: any) => {
   }
 };
 
-export const getAvgSales = async () => {
+export const getAvgSales = async (salesData: any) => {
   const token = localStorage.getItem(TOKEN());
   const config = {
-    ...getAuthConfig(token!),
+    ...getAuthConfig(token!, 'post'),
     url: HOST + '/AvgSales',
+    data: JSON.stringify(salesData)
   };
 
   try {
