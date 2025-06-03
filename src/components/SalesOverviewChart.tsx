@@ -1,4 +1,4 @@
-
+//comment
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
@@ -47,7 +47,7 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
       // Show averages for selected machine
       monthlyAvg = avgSales.monthly[selectedMachine] || 0;
       annualAvg = avgSales.annual[selectedMachine] || 0;
-      
+
       // Calculate selected period average from current sales data
       const totalSales = salesData.reduce((sum: number, day: any) => {
         return sum + Object.keys(day).filter(key => key.startsWith('slot')).reduce((daySum, slot) => daySum + (day[slot] || 0), 0);
@@ -57,10 +57,10 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
       // Show averages for all machines
       const monthlyValues = Object.values(avgSales.monthly);
       const annualValues = Object.values(avgSales.annual);
-      
+
       monthlyAvg = monthlyValues.length > 0 ? monthlyValues.reduce((sum: number, val: number) => sum + val, 0) / monthlyValues.length : 0;
       annualAvg = annualValues.length > 0 ? annualValues.reduce((sum: number, val: number) => sum + val, 0) / annualValues.length : 0;
-      
+
       // Calculate selected period average from current sales data
       const totalSales = salesData.reduce((sum: number, day: any) => {
         return sum + Object.keys(day).filter(key => key.startsWith('slot')).reduce((daySum, slot) => daySum + (day[slot] || 0), 0);
