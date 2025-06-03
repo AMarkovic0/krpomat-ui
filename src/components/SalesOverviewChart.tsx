@@ -131,15 +131,15 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
       </CardHeader>
       <CardContent className="p-3 pt-0">
         {isLoading ? (
-          <div className="flex items-center justify-center h-[200px]">
+          <div className="flex items-center justify-center h-[240px]">
             <p className="text-muted-foreground text-sm">Loading sales data...</p>
           </div>
         ) : salesData.length > 0 ? (
-          <div className="space-y-3">
-            <div className="w-full h-[200px]">
+          <div className="space-y-4">
+            <div className="w-full h-[180px]">
               <SalesBarChart salesData={salesData} numSlots={numSlots} />
             </div>
-            <div className="flex justify-center space-x-6 text-xs">
+            <div className="flex justify-center space-x-6 text-xs pt-2 border-t">
               <div className="text-center">
                 <div className="font-medium text-muted-foreground">Monthly Avg</div>
                 <div className="font-semibold">{averages.monthly.toFixed(1)}</div>
@@ -155,7 +155,7 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[200px]">
+          <div className="flex items-center justify-center h-[240px]">
             <p className="text-muted-foreground text-sm">
               {dateRange?.from
                 ? searchQuery
