@@ -7,28 +7,16 @@ interface AverageSalesCardProps {
     annual: number;
     selected: number;
   };
-  selectedMachine?: string | null;
-  selectedMachineData?: {
-    name: string;
-  } | null;
-  searchQuery?: string;
 }
 
-export const AverageSalesCard = ({ 
-  averages, 
-  selectedMachine, 
-  selectedMachineData, 
-  searchQuery = "" 
+export const AverageSalesCard = ({
+  averages,
 }: AverageSalesCardProps) => {
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium">
-          {selectedMachineData
-            ? `Average Sales - ${selectedMachineData.name}`
-            : searchQuery
-              ? `Average Sales - Filtered by "${searchQuery}"`
-              : 'Average Sales - All Machines'}
+            {'Average Sales'}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 pt-0">
