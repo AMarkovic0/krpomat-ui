@@ -30,7 +30,8 @@ const Index = () => {
   const [salesData, setSalesData] = useState<any[]>([]);
   const [avgSales, setAvgSalesData] = useState<AverageSale>({
     monthly: {},
-    annual: {}
+    annual: {},
+    selected: {}
   });
 
   const [onlineStateHistory, setOnlineStateHistory] = useState<any[]>([]);

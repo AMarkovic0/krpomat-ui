@@ -1,3 +1,4 @@
+
 //comment
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,40 +36,50 @@ export const SalesOverviewChart = ({ selectedMachine, machines, dateRange, searc
   // Filter machines based on search query if no specific machine is selected
   const numSlots = selectedMachineData?.totalSlots || 1;
 
-  // Calculate averages
+  // Calculate averages with proper null/undefined checks
   const calculateAverages = () => {
-    if (!avgSales) return { monthly: 0, annual: 0, selected: 0 };
+    // Default values if avgSales is undefined or incomplete
+    const defaultAverage = { monthly: 0, annual: 0, selected: 0 };
+    
+    if (!avgSales || !avgSales.monthly || !avgSales.annual) {
+      return defaultAverage;
+    }
 
     let monthlyAvg = 0;
     let annualAvg = 0;
     let selectedAvg = 0;
 
-    if (selectedMachine) {
-      // Show averages for selected machine
-      monthlyAvg = avgSales.monthly[selectedMachine] || 0;
-      annualAvg = avgSales.annual[selectedMachine] || 0;
+    try {
+      if (selectedMachine) {
+        // Show averages for selected machine
+        monthlyAvg = avgSales.monthly[selectedMachine] || 0;
+        annualAvg = avgSales.annual[selectedMachine] || 0;
 
-      // Calculate selected period average from current sales data
-      const totalSales = salesData.reduce((sum: number, day: any) => {
-        return sum + Object.keys(day).filter(key => key.startsWith('slot')).reduce((daySum, slot) => daySum + (day[slot] || 0), 0);
-      }, 0);
-      selectedAvg = salesData.length > 0 ? totalSales / salesData.length : 0;
-    } else {
-      // Show averages for all machines
-      const monthlyValues = Object.values(avgSales.monthly);
-      const annualValues = Object.values(avgSales.annual);
+        // Calculate selected period average from current sales data
+        const totalSales = salesData.reduce((sum: number, day: any) => {
+          return sum + Object.keys(day).filter(key => key.startsWith('slot')).reduce((daySum, slot) => daySum + (day[slot] || 0), 0);
+        }, 0);
+        selectedAvg = salesData.length > 0 ? totalSales / salesData.length : 0;
+      } else {
+        // Show averages for all machines
+        const monthlyValues = Object.values(avgSales.monthly || {});
+        const annualValues = Object.values(avgSales.annual || {});
 
-      monthlyAvg = monthlyValues.length > 0 ? monthlyValues.reduce((sum: number, val: number) => sum + val, 0) / monthlyValues.length : 0;
-      annualAvg = annualValues.length > 0 ? annualValues.reduce((sum: number, val: number) => sum + val, 0) / annualValues.length : 0;
+        monthlyAvg = monthlyValues.length > 0 ? monthlyValues.reduce((sum: number, val: number) => sum + val, 0) / monthlyValues.length : 0;
+        annualAvg = annualValues.length > 0 ? annualValues.reduce((sum: number, val: number) => sum + val, 0) / annualValues.length : 0;
 
-      // Calculate selected period average from current sales data
-      const totalSales = salesData.reduce((sum: number, day: any) => {
-        return sum + Object.keys(day).filter(key => key.startsWith('slot')).reduce((daySum, slot) => daySum + (day[slot] || 0), 0);
-      }, 0);
-      selectedAvg = salesData.length > 0 ? totalSales / salesData.length : 0;
+        // Calculate selected period average from current sales data
+        const totalSales = salesData.reduce((sum: number, day: any) => {
+          return sum + Object.keys(day).filter(key => key.startsWith('slot')).reduce((daySum, slot) => daySum + (day[slot] || 0), 0);
+        }, 0);
+        selectedAvg = salesData.length > 0 ? totalSales / salesData.length : 0;
+      }
+
+      return { monthly: monthlyAvg, annual: annualAvg, selected: selectedAvg };
+    } catch (error) {
+      console.error("Error calculating averages:", error);
+      return defaultAverage;
     }
-
-    return { monthly: monthlyAvg, annual: annualAvg, selected: selectedAvg };
   };
 
   const averages = calculateAverages();
