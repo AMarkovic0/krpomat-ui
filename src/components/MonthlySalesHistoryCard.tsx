@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { getSales } from "../api";
+import { getAvgSales } from "../api";
 
 interface MonthlyData {
   month: string;
@@ -25,7 +25,7 @@ export const MonthlySalesHistoryCard = () => {
         for (let i = 11; i >= 0; i--) {
           const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
           const endDate = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
-          
+
           const formattedFromDate = `${targetDate.getDate()}.${targetDate.getMonth() + 1}.${targetDate.getFullYear()}.`;
           const formattedToDate = `${endDate.getDate()}.${endDate.getMonth() + 1}.${endDate.getFullYear()}.`;
 
@@ -35,16 +35,18 @@ export const MonthlySalesHistoryCard = () => {
           };
 
           try {
-            const data = await getSales(salesParams);
-            
-            // Calculate average sales for the month
-            const totalSales = data.reduce((sum: number, sale: any) => {
-              const saleAmount = sale.amount || sale.total || 1; // Default to 1 if no amount field
-              return sum + saleAmount;
-            }, 0);
-            
-            const average = data.length > 0 ? totalSales / data.length : 0;
-            
+            const data = await getAvgSales(salesParams);
+            let average = 0;
+
+            for (var id in data.selected) {
+              average += data.selected[id];
+            }
+
+            average = average / Object.keys(data.selected).length;
+
+            // Temporary remove peak
+            if (average > 80) average = 0;
+
             monthlyResults.push({
               month: targetDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
               average: parseFloat(average.toFixed(2))
@@ -85,27 +87,27 @@ export const MonthlySalesHistoryCard = () => {
           <div className="w-full h-[150px]">
             <ChartContainer config={{}}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart 
+                <LineChart
                   data={monthlyData}
-                  margin={{ top: 5, right: 15, left: 5, bottom: 25 }}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 630 }}
                 >
-                  <XAxis 
+                  <XAxis
                     dataKey="month"
                     tick={{ fontSize: 9 }}
                     tickLine={false}
                     axisLine={false}
                     angle={-45}
                     textAnchor="end"
-                    height={25}
+                    height={1}
                     interval={0}
                   />
-                  <YAxis 
+                  <YAxis
                     tick={{ fontSize: 9 }}
                     tickLine={false}
                     axisLine={false}
-                    width={30}
+                    width={1}
                   />
-                  <ChartTooltip 
+                  <ChartTooltip
                     content={<ChartTooltipContent />}
                   />
                   <Line
