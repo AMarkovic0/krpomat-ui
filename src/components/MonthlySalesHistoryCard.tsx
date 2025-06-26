@@ -71,38 +71,39 @@ export const MonthlySalesHistoryCard = () => {
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-medium">
           Monthly Average Sales History (Last 12 Months)
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 pt-0">
+      <CardContent className="pt-2">
         {isLoading ? (
-          <div className="flex items-center justify-center h-[200px]">
-            <p className="text-muted-foreground text-sm">Loading monthly data...</p>
+          <div className="flex items-center justify-center h-[300px]">
+            <p className="text-muted-foreground">Loading monthly data...</p>
           </div>
         ) : monthlyData.length > 0 ? (
-          <div className="w-full h-[200px]">
+          <div className="w-full h-[300px]">
             <ChartContainer config={{}}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={monthlyData}
-                  margin={{ top: 10, right: 10, left: 10, bottom: 40 }}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                 >
                   <XAxis 
                     dataKey="month"
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
                     angle={-45}
                     textAnchor="end"
-                    height={35}
+                    height={60}
+                    interval={0}
                   />
                   <YAxis 
-                    tick={{ fontSize: 10 }}
+                    tick={{ fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
-                    width={40}
+                    width={50}
                   />
                   <ChartTooltip 
                     content={<ChartTooltipContent />}
@@ -112,16 +113,16 @@ export const MonthlySalesHistoryCard = () => {
                     dataKey="average"
                     stroke="#8884d8"
                     strokeWidth={2}
-                    dot={{ fill: '#8884d8', strokeWidth: 2, r: 3 }}
-                    activeDot={{ r: 5 }}
+                    dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[200px]">
-            <p className="text-muted-foreground text-sm">No monthly data available</p>
+          <div className="flex items-center justify-center h-[300px]">
+            <p className="text-muted-foreground">No monthly data available</p>
           </div>
         )}
       </CardContent>
