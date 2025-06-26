@@ -78,32 +78,32 @@ export const MonthlySalesHistoryCard = () => {
       </CardHeader>
       <CardContent className="pt-2">
         {isLoading ? (
-          <div className="flex items-center justify-center h-[300px]">
+          <div className="flex items-center justify-center h-[200px]">
             <p className="text-muted-foreground">Loading monthly data...</p>
           </div>
         ) : monthlyData.length > 0 ? (
-          <div className="w-full h-[300px]">
+          <div className="w-full h-[200px]">
             <ChartContainer config={{}}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={monthlyData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                  margin={{ top: 10, right: 20, left: 10, bottom: 40 }}
                 >
                   <XAxis 
                     dataKey="month"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 10 }}
                     tickLine={false}
                     axisLine={false}
                     angle={-45}
                     textAnchor="end"
-                    height={60}
+                    height={40}
                     interval={0}
                   />
                   <YAxis 
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 10 }}
                     tickLine={false}
                     axisLine={false}
-                    width={50}
+                    width={40}
                   />
                   <ChartTooltip 
                     content={<ChartTooltipContent />}
@@ -113,15 +113,15 @@ export const MonthlySalesHistoryCard = () => {
                     dataKey="average"
                     stroke="#8884d8"
                     strokeWidth={2}
-                    dot={{ fill: '#8884d8', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6 }}
+                    dot={{ fill: '#8884d8', strokeWidth: 2, r: 3 }}
+                    activeDot={{ r: 5 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[300px]">
+          <div className="flex items-center justify-center h-[200px]">
             <p className="text-muted-foreground">No monthly data available</p>
           </div>
         )}
