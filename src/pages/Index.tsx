@@ -8,6 +8,7 @@ import { DateSelector } from "@/components/DateSelector";
 import { OnlineStateTimeline } from "@/components/OnlineStateTimeline";
 import { DateTime } from "luxon";
 import { AverageSalesCard } from "@/components/AverageSalesCard";
+import { MonthlySalesHistoryCard } from "@/components/MonthlySalesHistoryCard";
 
 import { getMachines, getSales, getOnlineStateHistory, getAvgSales } from "../api";
 import { dateToIso } from "@/utils";
@@ -213,6 +214,10 @@ const Index = () => {
             avgSales={avgSales}
           />
         </div>
+      </div>
+
+      <div className="mb-6">
+        <MonthlySalesHistoryCard />
       </div>
 
       <div className="mb-6">
