@@ -10,10 +10,10 @@ interface OfflineMachinesDialogProps {
   };
 }
 
-export const OfflineMachinesDialog = ({ 
-  open, 
-  onOpenChange, 
-  selectedDayData 
+export const OfflineMachinesDialog = ({
+  open,
+  onOpenChange,
+  selectedDayData
 }: OfflineMachinesDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

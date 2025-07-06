@@ -6,11 +6,11 @@ import { processHistoryData, generateOptimizedData } from "./timeline/dataProces
 import { TimelineChart } from "./timeline/TimelineChart";
 import { OfflineMachinesDialog } from "./timeline/OfflineMachinesDialog";
 
-export const OnlineStateTimeline = ({ 
-  selectedMachine, 
-  history, 
-  machines, 
-  dateRange 
+export const OnlineStateTimeline = ({
+  selectedMachine,
+  history,
+  machines,
+  dateRange
 }: OnlineStateTimelineProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDayData, setSelectedDayData] = useState<{
@@ -28,9 +28,9 @@ export const OnlineStateTimeline = ({
   const handleBarClick = (data: any) => {
     if (!selectedMachine && data && data.offlineMachineIds) {
       const offlineMachineNames = data.offlineMachineIds
-        .map((id: number) => machines.find(m => m.id === id.toString())?.name)
+        .map((id: number) => machines.find(m => m.id === id)?.name)
         .filter(Boolean);
-      
+
       setSelectedDayData({
         date: data.formattedDate,
         machines: offlineMachineNames
