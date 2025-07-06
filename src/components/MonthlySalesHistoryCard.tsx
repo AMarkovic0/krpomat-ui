@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { getAvgSales } from "../api";
 
 interface MonthlyData {
@@ -87,38 +86,35 @@ export const MonthlySalesHistoryCard = () => {
           <div className="w-full h-[150px]">
             <ChartContainer config={{}}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
+                <BarChart
                   data={monthlyData}
-                  margin={{ top: 5, right: 5, left: 5, bottom: 630 }}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 30 }}
                 >
                   <XAxis
                     dataKey="month"
-                    tick={{ fontSize: 9 }}
+                    tick={{ fontSize: 8 }}
                     tickLine={false}
                     axisLine={false}
                     angle={-45}
                     textAnchor="end"
-                    height={1}
+                    height={25}
                     interval={0}
                   />
                   <YAxis
-                    tick={{ fontSize: 9 }}
+                    tick={{ fontSize: 8 }}
                     tickLine={false}
                     axisLine={false}
-                    width={1}
+                    width={25}
                   />
                   <ChartTooltip
                     content={<ChartTooltipContent />}
                   />
-                  <Line
-                    type="monotone"
+                  <Bar
                     dataKey="average"
-                    stroke="#8884d8"
-                    strokeWidth={1.5}
-                    dot={{ fill: '#8884d8', strokeWidth: 1, r: 2 }}
-                    activeDot={{ r: 4 }}
+                    fill="#8884d8"
+                    radius={[2, 2, 0, 0]}
                   />
-                </LineChart>
+                </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
           </div>
