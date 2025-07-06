@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getAvgSales } from "../api";
 
 interface MonthlyData {
@@ -71,57 +71,45 @@ export const MonthlySalesHistoryCard = () => {
   }, []);
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">
+    <Card className="min-w-[300px]">
+      <CardHeader>
+        <CardTitle className="text-base sm:text-lg">
           Monthly Average Sales History (Last 12 Months)
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-2">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-[120px]">
-            <p className="text-muted-foreground">Loading monthly data...</p>
-          </div>
-        ) : monthlyData.length > 0 ? (
-          <div className="w-full h-[120px]">
-            <ChartContainer config={{}}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={monthlyData}
-                  margin={{ top: 5, right: 5, left: 5, bottom: 20 }}
-                >
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fontSize: 7 }}
-                    tickLine={false}
-                    axisLine={false}
-                    angle={-45}
-                    textAnchor="end"
-                    height={20}
-                    interval={0}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 7 }}
-                    tickLine={false}
-                    axisLine={false}
-                    width={20}
-                  />
-                  <ChartTooltip
-                    content={<ChartTooltipContent />}
-                  />
-                  <Bar
-                    dataKey="average"
-                    fill="#8884d8"
-                    radius={[2, 2, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+      <CardContent>
+        {monthlyData.length > 0 ? (
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData}>
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12 }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  tick={{ fontSize: 12 }}
+                  label={{ value: 'Average Sales', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`${value}`, 'Average Sales']}
+                  labelFormatter={(label) => `Month: ${label}`}
+                />
+                <Bar
+                  dataKey="average"
+                  fill="#10b981"
+                  radius={[4, 4, 0, 0]}
+                  name="Average Sales"
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[120px]">
-            <p className="text-muted-foreground">No monthly data available</p>
-          </div>
+          <p className="text-center text-muted-foreground py-8">
+            {isLoading
+              ? 'Loading monthly data...'
+              : 'No monthly data available'}
+          </p>
         )}
       </CardContent>
     </Card>
