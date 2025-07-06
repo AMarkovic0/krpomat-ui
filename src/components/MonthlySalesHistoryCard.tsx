@@ -79,32 +79,32 @@ export const MonthlySalesHistoryCard = () => {
       </CardHeader>
       <CardContent className="pt-2">
         {isLoading ? (
-          <div className="flex items-center justify-center h-[150px]">
+          <div className="flex items-center justify-center h-[120px]">
             <p className="text-muted-foreground">Loading monthly data...</p>
           </div>
         ) : monthlyData.length > 0 ? (
-          <div className="w-full h-[150px]">
+          <div className="w-full h-[120px]">
             <ChartContainer config={{}}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={monthlyData}
-                  margin={{ top: 5, right: 5, left: 5, bottom: 30 }}
+                  margin={{ top: 5, right: 5, left: 5, bottom: 20 }}
                 >
                   <XAxis
                     dataKey="month"
-                    tick={{ fontSize: 8 }}
+                    tick={{ fontSize: 7 }}
                     tickLine={false}
                     axisLine={false}
                     angle={-45}
                     textAnchor="end"
-                    height={25}
+                    height={20}
                     interval={0}
                   />
                   <YAxis
-                    tick={{ fontSize: 8 }}
+                    tick={{ fontSize: 7 }}
                     tickLine={false}
                     axisLine={false}
-                    width={25}
+                    width={20}
                   />
                   <ChartTooltip
                     content={<ChartTooltipContent />}
@@ -119,7 +119,7 @@ export const MonthlySalesHistoryCard = () => {
             </ChartContainer>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[150px]">
+          <div className="flex items-center justify-center h-[120px]">
             <p className="text-muted-foreground">No monthly data available</p>
           </div>
         )}
