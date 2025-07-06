@@ -1,7 +1,8 @@
-
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format, differenceInMinutes, differenceInHours, startOfDay, endOfDay, isWithinInterval } from "date-fns";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from "recharts";
 import { DateRange } from "react-day-picker";
 import { dateToIso } from "@/utils";
 
@@ -32,6 +33,12 @@ interface OnlineStateTimelineProps {
 }
 
 export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRange }: OnlineStateTimelineProps) => {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedDayData, setSelectedDayData] = useState<{
+    date: string;
+    machines: string[];
+  }>({ date: "", machines: [] });
+
   const processHistoryData = (): OnlineStateEvent[] => {
     if (!dateRange?.from || !history.length) return [];
 
@@ -136,6 +143,7 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
         date: string;
         formattedDate: string;
         offlineMachineCount: number;
+        offlineMachineIds: number[];
       }[] = [];
 
       // Iterate through each day in the range
@@ -145,7 +153,7 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
         const dayEnd = endOfDay(currentDate);
 
         // Create a set of unique machine IDs that were offline on this day
-        const offlineMachinesForDay = new Set();
+        const offlineMachinesForDay = new Set<number>();
 
         // Check each offline period to see if it overlaps with this day
         for (const period of offlinePeriods) {
@@ -156,18 +164,22 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
         }
 
         // Get current offline machines count for this day
-        const currentlyOfflineMachines = machines.filter(m => !m.isOnline).length;
+        const currentlyOfflineMachines = machines.filter(m => !m.isOnline);
 
-        // For the current day, if we don't have any history, use the current offline count
-        const offlineMachineCount = currentDate.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0) &&
-                                   offlineMachinesForDay.size === 0 ?
-                                   currentlyOfflineMachines :
-                                   offlineMachinesForDay.size;
+        // For the current day, if we don't have any history, use the current offline machines
+        let offlineMachineIds: number[] = [];
+        if (currentDate.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0) &&
+            offlineMachinesForDay.size === 0) {
+          offlineMachineIds = currentlyOfflineMachines.map(m => parseInt(m.id));
+        } else {
+          offlineMachineIds = Array.from(offlineMachinesForDay);
+        }
 
         dailyOfflineCounts.push({
           date: format(currentDate, 'yyyy-MM-dd'),
           formattedDate: format(currentDate, 'MMM dd'),
-          offlineMachineCount
+          offlineMachineCount: offlineMachineIds.length,
+          offlineMachineIds
         });
 
         // Move to next day
@@ -184,77 +196,116 @@ export const OnlineStateTimeline = ({ selectedMachine, history, machines, dateRa
   const selectedMachineName = selectedMachine ?
     machines.find(m => m.id === selectedMachine)?.name : null;
 
+  const handleBarClick = (data: any) => {
+    if (!selectedMachine && data && data.offlineMachineIds) {
+      const offlineMachineNames = data.offlineMachineIds
+        .map((id: number) => machines.find(m => m.id === id.toString())?.name)
+        .filter(Boolean);
+      
+      setSelectedDayData({
+        date: data.formattedDate,
+        machines: offlineMachineNames
+      });
+      setDialogOpen(true);
+    }
+  };
+
   return (
-    <Card className="min-w-[300px]">
-      <CardHeader>
-        <CardTitle className="text-base sm:text-lg">
-          {selectedMachine
-            ? `Online Status Timeline - ${selectedMachineName || 'Machine #' + selectedMachine}`
-            : 'Daily Offline Machine Count'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {timelineData.length > 0 ? (
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              {selectedMachine ? (
-                <BarChart data={timelineData}>
-                  <XAxis
-                    dataKey="formattedDate"
-                    tick={{ fontSize: 12 }}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    domain={[0, 100]}
-                    unit="%"
-                    tick={{ fontSize: 12 }}
-                    label={{ value: 'Online Time', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [`${value}%`, 'Online Time']}
-                    labelFormatter={(label) => `Date: ${label}`}
-                  />
-                  <ReferenceLine y={90} stroke="#ff4d4f" strokeDasharray="3 3" />
-                  <Bar
-                    dataKey="onlinePercentage"
-                    fill="#10b981"
-                    radius={[4, 4, 0, 0]}
-                    name="Online %"
-                  />
-                </BarChart>
-              ) : (
-                <BarChart data={timelineData}>
-                  <XAxis
-                    dataKey="formattedDate"
-                    tick={{ fontSize: 12 }}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12 }}
-                    label={{ value: 'Offline Machines', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [`${value}`, 'Machines Offline']}
-                    labelFormatter={(label) => `Date: ${label}`}
-                  />
-                  <Bar
-                    dataKey="offlineMachineCount"
-                    fill="#f43f5e"
-                    radius={[4, 4, 0, 0]}
-                    name="Offline Machines"
-                  />
-                </BarChart>
-              )}
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-8">
+    <>
+      <Card className="min-w-[300px]">
+        <CardHeader>
+          <CardTitle className="text-base sm:text-lg">
             {selectedMachine
-              ? 'No timeline data available for the selected time period'
-              : 'No offline machine data available for the selected time period'}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+              ? `Online Status Timeline - ${selectedMachineName || 'Machine #' + selectedMachine}`
+              : 'Daily Offline Machine Count'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {timelineData.length > 0 ? (
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                {selectedMachine ? (
+                  <BarChart data={timelineData}>
+                    <XAxis
+                      dataKey="formattedDate"
+                      tick={{ fontSize: 12 }}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      domain={[0, 100]}
+                      unit="%"
+                      tick={{ fontSize: 12 }}
+                      label={{ value: 'Online Time', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                    />
+                    <Tooltip
+                      formatter={(value: number) => [`${value}%`, 'Online Time']}
+                      labelFormatter={(label) => `Date: ${label}`}
+                    />
+                    <ReferenceLine y={90} stroke="#ff4d4f" strokeDasharray="3 3" />
+                    <Bar
+                      dataKey="onlinePercentage"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                      name="Online %"
+                    />
+                  </BarChart>
+                ) : (
+                  <BarChart data={timelineData} onClick={handleBarClick}>
+                    <XAxis
+                      dataKey="formattedDate"
+                      tick={{ fontSize: 12 }}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12 }}
+                      label={{ value: 'Offline Machines', angle: -90, position: 'insideLeft', style: { fontSize: 12 } }}
+                    />
+                    <Tooltip
+                      formatter={(value: number) => [`${value}`, 'Machines Offline']}
+                      labelFormatter={(label) => `Date: ${label}`}
+                    />
+                    <Bar
+                      dataKey="offlineMachineCount"
+                      fill="#f43f5e"
+                      radius={[4, 4, 0, 0]}
+                      name="Offline Machines"
+                      onClick={handleBarClick}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </BarChart>
+                )}
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              {selectedMachine
+                ? 'No timeline data available for the selected time period'
+                : 'No offline machine data available for the selected time period'}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Offline Machines - {selectedDayData.date}</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-60 overflow-y-auto">
+            {selectedDayData.machines.length > 0 ? (
+              <ul className="space-y-2">
+                {selectedDayData.machines.map((machineName, index) => (
+                  <li key={index} className="p-2 bg-muted rounded text-sm">
+                    {machineName}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">No offline machines found for this day.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
