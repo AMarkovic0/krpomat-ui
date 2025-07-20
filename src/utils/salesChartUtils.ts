@@ -26,9 +26,27 @@ export const processDataByDate = (
   numSlots: number, 
   formatFn: (date: Date, format: string) => string
 ) => {
-  // Group sales by date
+  // Initialize all dates in the range first
   const groupedByDate: { [key: string]: any } = {};
   
+  if (dateRange?.from) {
+    const startDate = new Date(dateRange.from);
+    const endDate = dateRange?.to ? new Date(dateRange.to) : new Date();
+    
+    // Create entries for all dates in the range
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const dateKey = formatFn(currentDate, 'dd MMM');
+      groupedByDate[dateKey] = {
+        date: dateKey,
+        sortDate: new Date(currentDate), // Keep the actual date for sorting
+        ...Array.from({ length: numSlots }, (_, i) => ({ [`slot${i + 1}`]: 0 })).reduce((acc, slot) => ({ ...acc, ...slot }), {})
+      };
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  }
+  
+  // Now populate with actual sales data
   salesData.forEach(sale => {
     const saleDate = sale.sale_date || sale.date;
     if (!saleDate) return;
@@ -41,18 +59,13 @@ export const processDataByDate = (
     // Use a more readable date format for labels
     const dateKey = formatFn(date, 'dd MMM');
     
-    if (!groupedByDate[dateKey]) {
-      groupedByDate[dateKey] = {
-        date: dateKey,
-        sortDate: date, // Keep the actual date for sorting
-        ...Array.from({ length: numSlots }, (_, i) => ({ [`slot${i + 1}`]: 0 })).reduce((acc, slot) => ({ ...acc, ...slot }), {})
-      };
-    }
-    
-    // Add sale to appropriate slot
-    const slotNumber = sale.slot_number || 1;
-    if (slotNumber >= 1 && slotNumber <= numSlots) {
-      groupedByDate[dateKey][`slot${slotNumber}`] += 1;
+    // Only add sales if we have an entry for this date (within range)
+    if (groupedByDate[dateKey]) {
+      // Add sale to appropriate slot
+      const slotNumber = sale.slot_number || 1;
+      if (slotNumber >= 1 && slotNumber <= numSlots) {
+        groupedByDate[dateKey][`slot${slotNumber}`] += 1;
+      }
     }
   });
   

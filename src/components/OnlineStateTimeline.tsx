@@ -28,7 +28,7 @@ export const OnlineStateTimeline = ({
   const handleBarClick = (data: any) => {
     if (!selectedMachine && data && data.offlineMachineIds) {
       const offlineMachineNames = data.offlineMachineIds
-        .map((id: number) => machines.find(m => m.id === id)?.name)
+        .map((id: number) => machines.find(m => parseInt(m.id) === id)?.name)
         .filter(Boolean);
 
       setSelectedDayData({
