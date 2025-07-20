@@ -51,7 +51,8 @@ export const generateOptimizedData = (
   if (selectedMachine) {
     // Find the selected machine to check if it's online
     const selectedMachineObj = machines.find(m => m.id === selectedMachine);
-    const isSelectedMachineOnline = selectedMachineObj?.isOnline || false;
+    let defaultTime = new Date("01.01.1970 00:00:00").getTime();
+    const isSelectedMachineOnline = selectedMachineObj?.lastSeen.getTime() !== defaultTime;
 
     // Group by day for better visualization
     const dailyData: DailyData[] = [];
@@ -125,17 +126,7 @@ export const generateOptimizedData = (
         }
       }
 
-      // Get current offline machines count for this day
-      const currentlyOfflineMachines = machines.filter(m => !m.isOnline);
-
-      // For the current day, if we don't have any history, use the current offline machines
-      let offlineMachineIds: number[] = [];
-      if (currentDate.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0) &&
-          offlineMachinesForDay.size === 0) {
-        offlineMachineIds = currentlyOfflineMachines.map(m => parseInt(m.id));
-      } else {
-        offlineMachineIds = Array.from(offlineMachinesForDay);
-      }
+      const offlineMachineIds = Array.from(offlineMachinesForDay);
 
       dailyOfflineCounts.push({
         date: format(currentDate, 'yyyy-MM-dd'),
