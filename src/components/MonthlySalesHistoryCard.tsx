@@ -37,11 +37,15 @@ export const MonthlySalesHistoryCard = () => {
             const data = await getAvgSales(salesParams);
             let average = 0;
 
-            for (var id in data.selected) {
-              average += data.selected[id];
+            if (i === 0) {
+              for (var id in data.monthly) {
+                average += data.monthly[id];
+              }
+            } else {
+              for (var id in data.selected) {
+                average += data.selected[id];
+              }
             }
-
-            average = average / Object.keys(data.selected).length;
 
             // Temporary remove peak
             if (average > 80) average = 0;

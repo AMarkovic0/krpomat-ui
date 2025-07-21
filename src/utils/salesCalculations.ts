@@ -27,10 +27,6 @@ export const calculateAverages = (avgSales: AverageSale) => {
         selectedAvg += avgSales.selected[id];
     }
 
-    monthlyAvg = monthlyAvg / Object.keys(avgSales.monthly).length;
-    annualAvg = annualAvg / Object.keys(avgSales.annual).length;
-    selectedAvg = selectedAvg / Object.keys(avgSales.selected).length;
-
     return { monthly: monthlyAvg, annual: annualAvg, selected: selectedAvg };
   } catch (error) {
     console.error("Error calculating averages:", error);
