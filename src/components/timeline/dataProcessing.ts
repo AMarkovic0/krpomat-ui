@@ -49,7 +49,7 @@ export const generateOptimizedData = (
 
   // Get offline machines from the machines list (excluding those with default date "01.01.1970 00:00:00")
   const defaultTime = new Date("01.01.1970 00:00:00").getTime();
-  const offlineMachinesFromList = machines.filter(machine => 
+  const offlineMachinesFromList = machines.filter(machine =>
     !machine.isOnline && machine.lastSeen.getTime() !== defaultTime
   );
 
@@ -133,10 +133,11 @@ export const generateOptimizedData = (
       }
 
       // Add offline machines from the machines list that are currently offline
-      // and have lastSeen within this day's range
+      // and had a sale
       for (const machine of offlineMachinesFromList) {
-        const machineLastSeen = machine.lastSeen;
-        if (machineLastSeen >= dayStart && machineLastSeen <= dayEnd) {
+        const beginOfEpoch = new Date(0);
+        const machineLastSale = machine.lastSale;
+        if (machineLastSale.getTime() !== defaultTime) {
           offlineMachinesForDay.add(parseInt(machine.id));
         }
       }
