@@ -46,11 +46,13 @@ export const ExportConfigDialog = ({ open, onOpenChange, onExport }: ExportConfi
 
       if (salesData && salesData.length > 0) {
         const sampleRecord = salesData[0];
-        const availableColumns = Object.keys(sampleRecord).map(key => ({
-          key,
-          label: formatColumnLabel(key),
-          selected: true
-        }));
+        const availableColumns = Object.keys(sampleRecord)
+          .filter(key => !isExcludedColumn(key))
+          .map(key => ({
+            key,
+            label: formatColumnLabel(key),
+            selected: true
+          }));
         setColumns(availableColumns);
       }
     } catch (error) {
@@ -65,6 +67,13 @@ export const ExportConfigDialog = ({ open, onOpenChange, onExport }: ExportConfi
       ]);
     }
     setIsLoading(false);
+  };
+
+  const isExcludedColumn = (key: string): boolean => {
+    const excludedColumns = ['online_status_changed', 'phone_number', 'phone'];
+    return excludedColumns.some(excluded => 
+      key.toLowerCase().includes(excluded.toLowerCase())
+    );
   };
 
   const formatColumnLabel = (key: string): string => {
