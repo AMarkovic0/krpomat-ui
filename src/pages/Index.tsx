@@ -12,6 +12,7 @@ import { MonthlySalesHistoryCard } from "@/components/MonthlySalesHistoryCard";
 import { useMachines } from "@/hooks/useMachines";
 import { useSalesData } from "@/hooks/useSalesData";
 import { calculateAverages } from "@/utils/salesCalculations";
+import { ExportSalesButton } from "@/components/ExportSalesButton";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,10 +43,15 @@ const Index = () => {
   return (
     <div className="container mx-auto py-4 px-2 sm:py-8 sm:px-4">
       <div className="mb-6 space-y-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">Vending Machines Dashboard</h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          Monitor the status and stock levels of all vending machines
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Vending Machines Dashboard</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Monitor the status and stock levels of all vending machines
+            </p>
+          </div>
+          <ExportSalesButton />
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 mb-6">

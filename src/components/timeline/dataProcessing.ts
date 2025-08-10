@@ -132,15 +132,14 @@ export const generateOptimizedData = (
         }
       }
 
-      // Add offline machines from the machines list that are currently offline
-      // and had a sale
-      for (const machine of offlineMachinesFromList) {
-        const beginOfEpoch = new Date(0);
-        const machineLastSale = machine.lastSale;
-        if (machineLastSale.getTime() !== defaultTime) {
-          offlineMachinesForDay.add(parseInt(machine.id));
-        }
-      }
+  // Add offline machines from the machines list that are currently offline
+  // and have lastSeen within this day's range
+  for (const machine of offlineMachinesFromList) {
+    const machineLastSeen = machine.lastSeen;
+    if (machineLastSeen >= dayStart && machineLastSeen <= dayEnd) {
+      offlineMachinesForDay.add(parseInt(machine.id));
+    }
+  }
 
       const offlineMachineIds = Array.from(offlineMachinesForDay);
 
