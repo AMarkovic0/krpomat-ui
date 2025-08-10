@@ -47,6 +47,12 @@ export const generateOptimizedData = (
   const from = dateRange.from;
   const to = dateRange.to ? new Date(dateRange.to) : new Date();
 
+  // Get offline machines from the machines list (excluding those with default date "01.01.1970 00:00:00")
+  const defaultTime = new Date("01.01.1970 00:00:00").getTime();
+  const offlineMachinesFromList = machines.filter(machine => 
+    !machine.isOnline && machine.lastSeen.getTime() !== defaultTime
+  );
+
   // If a machine is selected, show its online/offline timeline
   if (selectedMachine) {
     // Find the selected machine to check if it's online
@@ -105,7 +111,7 @@ export const generateOptimizedData = (
 
     return dailyData;
   }
-  // No machine selected - show count of offline machines per day
+    // No machine selected - show count of offline machines per day
   else {
     const dailyOfflineCounts: DailyOfflineCount[] = [];
 
@@ -123,6 +129,15 @@ export const generateOptimizedData = (
         // If this period overlaps with the current day, add the machine to the set
         if (!(period.endTime < dayStart || period.startTime > dayEnd)) {
           offlineMachinesForDay.add(period.machineId);
+        }
+      }
+
+      // Add offline machines from the machines list that are currently offline
+      // and have lastSeen within this day's range
+      for (const machine of offlineMachinesFromList) {
+        const machineLastSeen = machine.lastSeen;
+        if (machineLastSeen >= dayStart && machineLastSeen <= dayEnd) {
+          offlineMachinesForDay.add(parseInt(machine.id));
         }
       }
 
