@@ -57,7 +57,6 @@ export const generateOptimizedData = (
   if (selectedMachine) {
     // Find the selected machine to check if it's online
     const selectedMachineObj = machines.find(m => m.id === selectedMachine);
-    let defaultTime = new Date("01.01.1970 00:00:00").getTime();
     const isSelectedMachineOnline = selectedMachineObj?.lastSeen.getTime() !== defaultTime;
 
     // Group by day for better visualization

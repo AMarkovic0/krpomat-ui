@@ -1,19 +1,23 @@
 import { getSales } from "@/api/sales";
+import { startOfDay, format } from "date-fns";
 
 export const exportSalesDataToCSV = async () => {
   try {
     // Get all sales data without date filters
-    const salesData = await getSales({});
-    
+    const salesData = await getSales({
+      start_date: "01.01.1970.",
+      end_date: format(startOfDay(new Date()), "dd.MM.yyy.")
+    });
+
     if (!salesData || salesData.length === 0) {
       throw new Error('No sales data available');
     }
 
     // Convert data to CSV format
     const csvContent = convertToCSV(salesData);
-    
+
     // Create and download the file
-    downloadCSV(csvContent, 'sales-data-all-time.csv');
+    downloadCSV(csvContent, 'sales-data-' + format(new Date(), "dd-MM-yyy-hhmmss") + '.csv');
   } catch (error) {
     console.error('Error exporting sales data:', error);
     throw error;
@@ -32,7 +36,7 @@ const convertToCSV = (data: any[]): string => {
   const csvHeaders = headers.join(',');
 
   // Create CSV data rows
-  const csvRows = data.map(obj => 
+  const csvRows = data.map(obj =>
     headers.map(header => {
       const value = obj[header];
       // Handle values that contain commas, quotes, or line breaks
@@ -53,7 +57,7 @@ const convertToCSV = (data: any[]): string => {
 const downloadCSV = (csvContent: string, filename: string) => {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
-  
+
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
