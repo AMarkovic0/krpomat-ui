@@ -16,7 +16,7 @@ interface Machine {
   totalSlots: number;
   companyName: string;
   phoneNumber: string;
-  lastSale: Date;
+  lastSale?: Date;
 }
 
 export const useMachines = () => {
@@ -50,10 +50,10 @@ export const useMachines = () => {
       totalSlots: machine.num_of_prod,
       companyName: machine.username,
       phoneNumber: machine.phone_number,
-      lastSale: DateTime.fromFormat(
+      lastSale: machine.sale_date ? DateTime.fromFormat(
         machine.sale_date,
         "dd.MM.yyyy HH:mm:ss"
-      ).toJSDate(),
+      ).toJSDate() : undefined,
     };
 
     let lastSeenTimeOffset = repacked.lastSeen.getTime() + MIN10_IN_MS;

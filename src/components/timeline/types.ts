@@ -20,6 +20,7 @@ export interface Machine {
   isOnline: boolean;
   lastSeen: Date;
   onlineStatusChanged?: Date;
+  lastSale?: Date;
 }
 
 export interface OnlineStateTimelineProps {

@@ -135,9 +135,8 @@ export const generateOptimizedData = (
       // Add offline machines from the machines list that are currently offline
       // and had a sale
       for (const machine of offlineMachinesFromList) {
-        const beginOfEpoch = new Date(0);
         const machineLastSale = machine.lastSale;
-        if (machineLastSale.getTime() !== defaultTime) {
+        if (machineLastSale && machineLastSale.getTime() !== defaultTime) {
           offlineMachinesForDay.add(parseInt(machine.id));
         }
       }
