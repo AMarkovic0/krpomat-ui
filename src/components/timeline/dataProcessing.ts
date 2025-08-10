@@ -57,6 +57,7 @@ export const generateOptimizedData = (
   if (selectedMachine) {
     // Find the selected machine to check if it's online
     const selectedMachineObj = machines.find(m => m.id === selectedMachine);
+    let defaultTime = new Date("01.01.1970 00:00:00").getTime();
     const isSelectedMachineOnline = selectedMachineObj?.lastSeen.getTime() !== defaultTime;
 
     // Group by day for better visualization
@@ -131,14 +132,15 @@ export const generateOptimizedData = (
         }
       }
 
-  // Add offline machines from the machines list that are currently offline
-  // and have lastSeen within this day's range
-  for (const machine of offlineMachinesFromList) {
-    const machineLastSeen = machine.lastSeen;
-    if (machineLastSeen >= dayStart && machineLastSeen <= dayEnd) {
-      offlineMachinesForDay.add(parseInt(machine.id));
-    }
-  }
+      // Add offline machines from the machines list that are currently offline
+      // and had a sale
+      for (const machine of offlineMachinesFromList) {
+        const beginOfEpoch = new Date(0);
+        const machineLastSale = machine.lastSale;
+        if (machineLastSale.getTime() !== defaultTime) {
+          offlineMachinesForDay.add(parseInt(machine.id));
+        }
+      }
 
       const offlineMachineIds = Array.from(offlineMachinesForDay);
 
