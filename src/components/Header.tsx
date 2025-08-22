@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LogOut, User, LayoutDashboard } from "lucide-react";
+import { LogOut, User, LayoutDashboard, Package } from "lucide-react";
 
 export const Header = () => {
   const { user, logout, isAdmin } = useAuth();
@@ -29,14 +29,24 @@ export const Header = () => {
             </Button>
 
             {isAdmin && (
-              <Button
-                variant={location.pathname === "/users" ? "default" : "ghost"}
-                onClick={() => navigate("/users")}
-                className="gap-2"
-              >
-                <User className="h-4 w-4" />
-                Users
-              </Button>
+              <>
+                <Button
+                  variant={location.pathname === "/users" ? "default" : "ghost"}
+                  onClick={() => navigate("/users")}
+                  className="gap-2"
+                >
+                  <User className="h-4 w-4" />
+                  Users
+                </Button>
+                <Button
+                  variant={location.pathname === "/products" ? "default" : "ghost"}
+                  onClick={() => navigate("/products")}
+                  className="gap-2"
+                >
+                  <Package className="h-4 w-4" />
+                  Products
+                </Button>
+              </>
             )}
           </nav>
 

@@ -9,6 +9,7 @@ import { Header } from "./components/Header";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Users from "./pages/Users";
+import Products from "./pages/Products";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   if (localStorage.getItem("isAuth") !== "true") return <Navigate to="/login" />;
@@ -41,6 +42,14 @@ const AppRoutes = () => {
           element={
             <AdminRoute>
               <Users />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <AdminRoute>
+              <Products />
             </AdminRoute>
           }
         />
