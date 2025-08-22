@@ -194,7 +194,7 @@ export function VendingMachineSettings({
                 Slot {index + 1}
               </label>
               <Select
-                value={selectedProducts[index] || ""}
+                value={selectedProducts[index] || "none"}
                 onValueChange={(value) => 
                   setSelectedProducts(prev => ({ ...prev, [index]: value }))
                 }
@@ -203,7 +203,7 @@ export function VendingMachineSettings({
                   <SelectValue placeholder="Select product" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No product</SelectItem>
+                  <SelectItem value="none">No product</SelectItem>
                   {products.map((product) => (
                     <SelectItem key={product.id} value={product.id}>
                       {product.name} - ${product.price}
