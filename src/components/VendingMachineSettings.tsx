@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,8 +10,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Settings, Trash2 } from "lucide-react";
 import { deleteMachine } from "../api";
+import { getProducts, type Product } from "../api/products";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
@@ -38,7 +46,24 @@ export function VendingMachineSettings({
   const [companyName, setCompanyName] = useState(initialCompanyName);
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Record<number, string>>({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsData = await getProducts();
+        setProducts(productsData);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    if (open) {
+      fetchProducts();
+    }
+  }, [open]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow numbers and basic phone number characters
@@ -161,6 +186,33 @@ export function VendingMachineSettings({
               max="5"
             />
           </div>
+          
+          {/* Product Selection for Each Slot */}
+          {Array.from({ length: parseInt(slots) || 1 }, (_, index) => (
+            <div key={index} className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right">
+                Slot {index + 1}
+              </label>
+              <Select
+                value={selectedProducts[index] || ""}
+                onValueChange={(value) => 
+                  setSelectedProducts(prev => ({ ...prev, [index]: value }))
+                }
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select product" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No product</SelectItem>
+                  {products.map((product) => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name} - ${product.price}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
         </div>
         <div className="flex justify-end space-x-2">
           <Button 
