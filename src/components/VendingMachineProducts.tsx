@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Package } from "lucide-react";
 import { getProducts, type Product } from "../api/products";
+import { updateMachineSlots } from "../api/machines";
 import { toast } from "@/hooks/use-toast";
 
 interface VendingMachineProductsProps {
@@ -56,13 +57,47 @@ export function VendingMachineProducts({
     fetchProducts();
   }, [open]);
 
-  const handleSave = () => {
-    console.log("Saving products for machine", id, selectedProducts);
-    toast({
-      title: "Success",
-      description: "Products updated successfully",
-    });
-    setOpen(false);
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // Convert product IDs to product keys for the API
+      const slotsWithKeys: Record<number, string> = {};
+      Object.entries(selectedProducts).forEach(([slotIndex, productId]) => {
+        if (productId && productId !== 'none') {
+          const product = products.find(p => p.id === productId);
+          if (product) {
+            slotsWithKeys[parseInt(slotIndex)] = product.key;
+          }
+        } else {
+          slotsWithKeys[parseInt(slotIndex)] = 'none';
+        }
+      });
+
+      const result = await updateMachineSlots(id, slotsWithKeys);
+      
+      if (result.error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: result.error,
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Products updated successfully",
+        });
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error("Error saving products:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save products",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getProductKey = (slotIndex: number): string => {
@@ -132,7 +167,9 @@ export function VendingMachineProducts({
           )}
         </div>
         <div className="flex justify-end">
-          <Button onClick={handleSave}>Save Products</Button>
+          <Button onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "Save Products"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

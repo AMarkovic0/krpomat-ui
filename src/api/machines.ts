@@ -78,3 +78,30 @@ export const deleteMachine = async (machine_id: string) => {
     return error;
   }
 };
+
+export const updateMachineSlots = async (machine_id: string, slots: Record<number, string>) => {
+  const token = localStorage.getItem(TOKEN());
+  
+  // Convert slot assignments to the format expected by the API
+  // slots is { slotIndex: productKey }
+  const slotData = Object.entries(slots).map(([slotIndex, productKey]) => ({
+    slot: parseInt(slotIndex) + 1, // Slots are 1-indexed on the server
+    product_key: productKey === 'none' ? null : productKey
+  }));
+
+  const config = {
+    ...getAuthConfig(token!, 'post'),
+    url: HOST + '/UpdateMachineSlots',
+    data: {
+      machine_id: +machine_id,
+      slots: slotData
+    }
+  };
+
+  try {
+    const { data } = await axios.request(config);
+    return data;
+  } catch (error) {
+    return { error: error.response?.data?.message || 'Failed to update machine slots' };
+  }
+};
