@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { VendingMachineSettings } from "./VendingMachineSettings";
+import { VendingMachineProducts } from "./VendingMachineProducts";
 
 interface AverageSale {
   monthly: { [machineId: string]: number };
@@ -152,6 +153,10 @@ export function VendingMachineCard({
           </div>
         </div>
       </CardContent>
+      <VendingMachineProducts
+        id={id}
+        totalSlots={totalSlots}
+      />
       <VendingMachineSettings
         id={id}
         initialName={name}
