@@ -42,12 +42,12 @@ export const addProduct = async (name: string, key: string, price: number) => {
   }
 };
 
-export const editProduct = async (id: string, name: string, key: string, price: number) => {
+export const editProduct = async (name: string, key: string, price: number) => {
   const token = localStorage.getItem(TOKEN());
   const config = {
     ...getAuthConfig(token!, 'put'),
     url: HOST + '/EditProduct',
-    data: { id, name, key, price }
+    data: { name, key, price }
   };
 
   try {
@@ -63,7 +63,7 @@ export const deleteProduct = async (id: string) => {
   const config = {
     ...getAuthConfig(token!, 'delete'),
     url: HOST + '/DeleteProduct',
-    data: { id }
+    data: { key: id }
   };
 
   try {

@@ -84,7 +84,7 @@ const Products = () => {
   }, [isAdmin, toast]);
 
   const handleEdit = (product: Product) => {
-    setEditingId(product.id);
+    setEditingId(product.key);
     setEditForm({
       name: product.name,
       key: product.key,
@@ -94,14 +94,14 @@ const Products = () => {
 
   const handleSave = async (id: string) => {
     try {
-      const result = await editProduct(id, editForm.name, editForm.key, editForm.price);
+      const result = await editProduct(editForm.name, id, editForm.price);
       if (result.error) {
         throw new Error(result.error);
       }
 
       setProducts((prev) =>
         prev.map((p) =>
-          p.id === id
+          p.key === id
             ? {
                 ...p,
                 name: editForm.name,
@@ -134,7 +134,7 @@ const Products = () => {
         throw new Error(result.error);
       }
 
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+      setProducts((prev) => prev.filter((p) => p.key !== id));
       toast({
         title: "Success",
         description: "Product deleted successfully",
@@ -153,13 +153,12 @@ const Products = () => {
     try {
       const name = values.name || `Product_${values.key}`;
       const result = await addProduct(name, values.key, values.price);
-      
+
       if (result.error) {
         throw new Error(result.error);
       }
 
       const newProduct: Product = {
-        id: result.id || String(Date.now()),
         name,
         key: values.key,
         price: values.price,
@@ -220,9 +219,9 @@ const Products = () => {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="Leave empty to auto-generate: Product_<KEY>" 
+                        <Input
+                          {...field}
+                          placeholder="Leave empty to auto-generate: Product_<KEY>"
                         />
                       </FormControl>
                       <FormMessage />
@@ -236,9 +235,9 @@ const Products = () => {
                     <FormItem>
                       <FormLabel>Price</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field} 
-                          type="number" 
+                        <Input
+                          {...field}
+                          type="number"
                           step="0.01"
                           onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         />
@@ -280,9 +279,9 @@ const Products = () => {
               </TableRow>
             ) : (
               products.map((product) => (
-                <TableRow key={product.id}>
+                <TableRow key={product.key}>
                   <TableCell>
-                    {editingId === product.id ? (
+                    {editingId === product.key ? (
                       <Input
                         value={editForm.key}
                         onChange={(e) =>
@@ -294,7 +293,7 @@ const Products = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    {editingId === product.id ? (
+                    {editingId === product.key ? (
                       <Input
                         value={editForm.name}
                         onChange={(e) =>
@@ -306,15 +305,15 @@ const Products = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    {editingId === product.id ? (
+                    {editingId === product.key ? (
                       <Input
                         type="number"
                         step="0.01"
                         value={editForm.price}
                         onChange={(e) =>
-                          setEditForm({ 
-                            ...editForm, 
-                            price: parseFloat(e.target.value) || 0 
+                          setEditForm({
+                            ...editForm,
+                            price: parseFloat(e.target.value) || 0
                           })
                         }
                       />
@@ -323,11 +322,11 @@ const Products = () => {
                     )}
                   </TableCell>
                   <TableCell>
-                    {editingId === product.id ? (
+                    {editingId === product.key ? (
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           size="sm"
-                          onClick={() => handleSave(product.id)}
+                          onClick={() => handleSave(product.key)}
                         >
                           Save
                         </Button>
@@ -341,8 +340,8 @@ const Products = () => {
                       </div>
                     ) : (
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleEdit(product)}
                         >
@@ -351,7 +350,7 @@ const Products = () => {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product.key)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
