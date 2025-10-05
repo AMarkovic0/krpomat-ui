@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Package } from "lucide-react";
 import { getProducts, type Product } from "../api/products";
-import { updateMachineSlots } from "../api/machines";
+import { updateMachineSlots, getMachineSlots } from "../api/machines";
 import { toast } from "@/hooks/use-toast";
 
 interface VendingMachineProductsProps {
@@ -35,27 +35,51 @@ export function VendingMachineProducts({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       if (!open) return;
       
       setLoading(true);
       try {
-        const productsData = await getProducts();
+        // Fetch products and current slot assignments in parallel
+        const [productsData, slotsData] = await Promise.all([
+          getProducts(),
+          getMachineSlots(id)
+        ]);
+        
         setProducts(productsData);
+        
+        // Parse slot assignments if available
+        if (slotsData && !slotsData.error && Array.isArray(slotsData)) {
+          const assignments: Record<number, string> = {};
+          slotsData.forEach((slot: { slot: number; product_key: string | null }) => {
+            // Slots from server are 1-indexed, convert to 0-indexed for our state
+            const slotIndex = slot.slot - 1;
+            if (slot.product_key) {
+              // Find the product ID from the key
+              const product = productsData.find(p => p.key === slot.product_key);
+              if (product) {
+                assignments[slotIndex] = String(product.id);
+              }
+            } else {
+              assignments[slotIndex] = 'none';
+            }
+          });
+          setSelectedProducts(assignments);
+        }
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching data:", error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load products",
+          description: "Failed to load products and slot assignments",
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
-  }, [open]);
+    fetchData();
+  }, [open, id]);
 
   const handleSave = async () => {
     setLoading(true);

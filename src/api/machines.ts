@@ -105,3 +105,19 @@ export const updateMachineSlots = async (machine_id: string, slots: Record<numbe
     return { error: error.response?.data?.message || 'Failed to update machine slots' };
   }
 };
+
+export const getMachineSlots = async (machine_id: string) => {
+  const token = localStorage.getItem(TOKEN());
+  const config = {
+    ...getAuthConfig(token!),
+    url: HOST + '/GetMachineSlots/' + machine_id
+  };
+
+  try {
+    const { data } = await axios.request(config);
+    return data;
+  } catch (error) {
+    handle401(error);
+    return { error: error.response?.data?.message || 'Failed to fetch machine slots' };
+  }
+};
