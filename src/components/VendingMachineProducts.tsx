@@ -64,7 +64,7 @@ export function VendingMachineProducts({
       const slotsWithKeys: Record<number, string> = {};
       Object.entries(selectedProducts).forEach(([slotIndex, productId]) => {
         if (productId && productId !== 'none') {
-          const product = products.find(p => p.id === productId);
+          const product = products.find(p => String(p.id) === productId);
           if (product) {
             slotsWithKeys[parseInt(slotIndex)] = product.key;
           }
@@ -104,7 +104,7 @@ export function VendingMachineProducts({
     const productId = selectedProducts[slotIndex];
     if (!productId || productId === "none") return "No product";
     
-    const product = products.find(p => p.id === productId);
+    const product = products.find(p => String(p.id) === productId);
     return product?.key || "Unknown";
   };
 
@@ -154,9 +154,9 @@ export function VendingMachineProducts({
                     <SelectValue placeholder="Select product" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No product</SelectItem>
+                    <SelectItem key="none" value="none">No product</SelectItem>
                     {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
+                      <SelectItem key={String(product.id)} value={String(product.id)}>
                         {product.name} - ${product.price} (Key: {product.key})
                       </SelectItem>
                     ))}
