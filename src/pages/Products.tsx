@@ -159,6 +159,7 @@ const Products = () => {
       }
 
       const newProduct: Product = {
+        id: values.key,
         name,
         key: values.key,
         price: values.price,
@@ -281,16 +282,7 @@ const Products = () => {
               products.map((product) => (
                 <TableRow key={product.key}>
                   <TableCell>
-                    {editingId === product.key ? (
-                      <Input
-                        value={editForm.key}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, key: e.target.value })
-                        }
-                      />
-                    ) : (
-                      product.key
-                    )}
+                    {product.key}
                   </TableCell>
                   <TableCell>
                     {editingId === product.key ? (
