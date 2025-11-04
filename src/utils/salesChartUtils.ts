@@ -64,7 +64,7 @@ export const processDataByDate = (
       // Add sale to appropriate slot
       const slotNumber = sale.slot_number || 1;
       if (slotNumber >= 1 && slotNumber <= numSlots) {
-        groupedByDate[dateKey][`slot${slotNumber}`] += 1;
+        groupedByDate[dateKey][`slot${slotNumber}`] += sale['p' + slotNumber];
       }
     }
   });
